@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+:root {
+  /* Background and Text Colors */
+  --background: #e3fff1;
+  --foreground: #0f172a;
+
+  /* Brand Colors */
+  --primary-green: #3fa34d;
+  --primary-blue: #2563eb;
+
+  /* Surface Colors for Cards/Sections */
+  --surface: #6FCF97;
+
+  /* Text Colors */
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+
+  /* Status Colors */
+  --available: #22c55e;
+  --occupied: #ef4444;
+  --maintenance: #f59e0b;
+
+  /* Border & Shadow */
+  --border-soft: #e2e8f0;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-primary-green: var(--primary-green);
+  --color-primary-blue: var(--primary-blue);
+
+  --color-surface: var(--surface);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+
+  --color-available: var(--available);
+  --color-occupied: var(--occupied);
+  --color-maintenance: var(--maintenance);
+
+  --color-border-soft: var(--border-soft);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
