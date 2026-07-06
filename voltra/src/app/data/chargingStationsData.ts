@@ -7,6 +7,8 @@ export const ChargingStationsData: station[] = [
     location: "Tunjungan Plaza 6",
     area: "Kedungdoro, Tegalsari",
     address: "Jl. Basuki Rahmat No.8-12, Kedungdoro, Tegalsari, Surabaya",
+    longitude: -7.257472,
+    latitude: 112.752088,
     chargingTypes: [
       { type: "Normal", power: 22, total: 6, available: 3 },
       { type: "Fast", power: 60, total: 4, available: 2 },
@@ -20,6 +22,8 @@ export const ChargingStationsData: station[] = [
     location: "Grand City Mall",
     area: "Ketabang, Genteng",
     address: "Jl. Gubeng Pojok No.1, Ketabang, Genteng, Surabaya",
+    longitude: -7.257472,
+    latitude: 112.752088,
     chargingTypes: [
       { type: "Normal", power: 22, total: 4, available: 2 },
       { type: "Fast", power: 60, total: 3, available: 2 },
@@ -33,6 +37,8 @@ export const ChargingStationsData: station[] = [
     location: "BG Junction Mall",
     area: "Bubutan",
     address: "Jl. Bubutan No.1-7, Bubutan, Surabaya",
+    longitude: -7.257472,
+    latitude: 112.752088,
     chargingTypes: [
       { type: "Normal", power: 22, total: 5, available: 1 },
       { type: "Fast", power: 60, total: 3, available: 1 },
@@ -46,6 +52,8 @@ export const ChargingStationsData: station[] = [
     location: "Surabaya Plaza",
     area: "Embong Kaliasin, Genteng",
     address: "Jl. Pemuda No.31-37, Embong Kaliasin, Genteng, Surabaya",
+    longitude: -7.257472,
+    latitude: 112.752088,
     chargingTypes: [
       { type: "Normal", power: 22, total: 5, available: 0 },
       { type: "Fast", power: 60, total: 3, available: 0 },
@@ -59,6 +67,8 @@ export const ChargingStationsData: station[] = [
     location: "Pakuwon Mall",
     area: "Babatan, Wiyung",
     address: "Jl. Puncak Indah Lontar No.2, Babatan, Wiyung, Surabaya",
+    longitude: -7.257472,
+    latitude: 112.752088,
     chargingTypes: [
       { type: "Normal", power: 22, total: 8, available: 5 },
       { type: "Fast", power: 60, total: 6, available: 3 },
@@ -72,6 +82,8 @@ export const ChargingStationsData: station[] = [
     location: "Ciputra World Surabaya",
     area: "Dukuh Pakis",
     address: "Jl. Mayjen Sungkono No.89, Dukuh Pakis, Surabaya",
+    longitude: -7.257472,
+    latitude: 112.752088,
     chargingTypes: [
       { type: "Normal", power: 22, total: 6, available: 0 },
       { type: "Fast", power: 60, total: 4, available: 0 },
@@ -85,6 +97,8 @@ export const ChargingStationsData: station[] = [
     location: "Lenmarc Mall",
     area: "Pradahkalikendal",
     address: "Jl. Bukit Darmo Boulevard, Pradahkalikendal, Surabaya",
+    longitude: -7.257472,
+    latitude: 112.752088,
     chargingTypes: [
       { type: "Normal", power: 22, total: 5, available: 2 },
       { type: "Fast", power: 60, total: 3, available: 2 },
@@ -98,6 +112,8 @@ export const ChargingStationsData: station[] = [
     location: "Pakuwon Trade Center",
     area: "Pradahkalikendal",
     address: "Jl. HR Muhammad No.2, Pradahkalikendal, Surabaya",
+    longitude: -7.257472,
+    latitude: 112.752088,
     chargingTypes: [
       { type: "Normal", power: 22, total: 6, available: 2 },
       { type: "Fast", power: 60, total: 4, available: 1 },
@@ -111,6 +127,8 @@ export const ChargingStationsData: station[] = [
     location: "Spazio Tower",
     area: "Pradahkalikendal",
     address: "Jl. Mayjen Yono Suwoyo, Pradahkalikendal, Surabaya",
+    longitude: -7.257472,
+    latitude: 112.752088,
     chargingTypes: [
       { type: "Normal", power: 22, total: 4, available: 1 },
       { type: "Fast", power: 60, total: 2, available: 1 },
@@ -124,6 +142,8 @@ export const ChargingStationsData: station[] = [
     location: "Galaxy Mall 3",
     area: "Mulyorejo",
     address: "Jl. Dharmahusada Indah Timur No.35-37, Mulyorejo, Surabaya",
+    longitude: -7.257472,
+    latitude: 112.752088,
     chargingTypes: [
       { type: "Normal", power: 22, total: 6, available: 2 },
       { type: "Fast", power: 60, total: 4, available: 1 },
@@ -137,6 +157,8 @@ export const ChargingStationsData: station[] = [
     location: "Pakuwon City Mall",
     area: "Mulyorejo",
     address: "Jl. Raya Laguna KJW Putih Tambak, Mulyorejo, Surabaya",
+    longitude: -7.257472,
+    latitude: 112.752088,
     chargingTypes: [
       { type: "Normal", power: 22, total: 6, available: 4 },
       { type: "Fast", power: 60, total: 4, available: 2 },
@@ -150,6 +172,8 @@ export const ChargingStationsData: station[] = [
     location: "Institut Teknologi Sepuluh Nopember",
     area: "Keputih, Sukolilo",
     address: "Jl. Teknik Kimia, Keputih, Sukolilo, Surabaya",
+    longitude: -7.257472,
+    latitude: 112.752088,
     chargingTypes: [
       { type: "Normal", power: 22, total: 5, available: 3 },
       { type: "Fast", power: 60, total: 3, available: 2 },
@@ -163,6 +187,8 @@ export const ChargingStationsData: station[] = [
     location: "MERR Business District",
     area: "Rungkut",
     address: "Jl. Dr. Ir. H. Soekarno, Rungkut, Surabaya",
+    longitude: -7.257472,
+    latitude: 112.752088,
     chargingTypes: [
       { type: "Normal", power: 22, total: 5, available: 1 },
       { type: "Fast", power: 60, total: 3, available: 0 },
@@ -176,6 +202,8 @@ export const ChargingStationsData: station[] = [
     location: "Kenjeran Park",
     area: "Bulak",
     address: "Jl. Sukolilo No.100, Bulak, Surabaya",
+    longitude: -7.257472,
+    latitude: 112.752088,
     chargingTypes: [
       { type: "Normal", power: 22, total: 4, available: 2 },
       { type: "Fast", power: 60, total: 2, available: 1 },
@@ -189,6 +217,8 @@ export const ChargingStationsData: station[] = [
     location: "Royal Plaza",
     area: "Wonokromo",
     address: "Jl. Ahmad Yani No.16-18, Wonokromo, Surabaya",
+    longitude: -7.257472,
+    latitude: 112.752088,
     chargingTypes: [
       { type: "Normal", power: 22, total: 6, available: 2 },
       { type: "Fast", power: 60, total: 4, available: 1 },
@@ -202,6 +232,8 @@ export const ChargingStationsData: station[] = [
     location: "City of Tomorrow Mall",
     area: "Gayungan",
     address: "Jl. Ahmad Yani No.288, Gayungan, Surabaya",
+    longitude: -7.257472,
+    latitude: 112.752088,
     chargingTypes: [
       { type: "Normal", power: 22, total: 5, available: 4 },
       { type: "Fast", power: 60, total: 3, available: 2 },
@@ -215,6 +247,8 @@ export const ChargingStationsData: station[] = [
     location: "DBL Arena",
     area: "Wonokromo",
     address: "Jl. Ahmad Yani No.88, Wonokromo, Surabaya",
+    longitude: -7.257472,
+    latitude: 112.752088,
     chargingTypes: [
       { type: "Normal", power: 22, total: 4, available: 1 },
       { type: "Fast", power: 60, total: 3, available: 1 },
@@ -228,6 +262,8 @@ export const ChargingStationsData: station[] = [
     location: "Plaza Marina",
     area: "Wonocolo",
     address: "Jl. Margorejo Indah No.97-99, Wonocolo, Surabaya",
+    longitude: -7.257472,
+    latitude: 112.752088,
     chargingTypes: [
       { type: "Normal", power: 22, total: 6, available: 0 },
       { type: "Fast", power: 60, total: 4, available: 0 },
@@ -241,6 +277,8 @@ export const ChargingStationsData: station[] = [
     location: "Jembatan Merah Plaza",
     area: "Krembangan Selatan",
     address: "Jl. Rajawali No.82-84, Krembangan Selatan, Surabaya",
+    longitude: -7.257472,
+    latitude: 112.752088,
     chargingTypes: [
       { type: "Normal", power: 22, total: 5, available: 3 },
       { type: "Fast", power: 60, total: 2, available: 1 },
@@ -254,6 +292,8 @@ export const ChargingStationsData: station[] = [
     location: "Pelabuhan Tanjung Perak",
     area: "Perak Utara, Pabean Cantikan",
     address: "Jl. Perak Timur No.620, Perak Utara, Pabean Cantikan, Surabaya",
+    longitude: -7.257472,
+    latitude: 112.752088,
     chargingTypes: [
       { type: "Normal", power: 22, total: 8, available: 4 },
       { type: "Fast", power: 60, total: 6, available: 2 },

@@ -8,7 +8,7 @@ export default function Button({ text }: ButtonProps) {
       className="
         w-full
         rounded-xl
-        bg-primary-green
+        bg-green-500
         px-6
         py-3
         font-semibold

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Button from "../components/button";
 
 export default function RegisterForm() {
     const router = useRouter();
@@ -75,7 +76,7 @@ export default function RegisterForm() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="border border-gray-300 rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <button type="submit" className="bg-primary-blue text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Register</button>
+            <Button text="Register" />
         </form>
     );
 }

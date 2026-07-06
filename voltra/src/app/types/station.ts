@@ -11,6 +11,8 @@ export type station = {
   location: string;
   area: string;
   address: string;
+  latitude: number;
+  longitude: number;
   chargingTypes: chargingTypes[];
   status: string;
 };

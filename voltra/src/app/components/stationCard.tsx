@@ -1,4 +1,5 @@
 import { station } from "../types/station";
+import Button from "./button";
 
 type StationCardProps = {
   station: station;
@@ -38,9 +39,7 @@ export default function StationCard({ station }: StationCardProps) {
         ))}
         </div>
 
-      <button className="mt-4 w-full rounded-xl bg-green-500 py-3 font-semibold text-slate-950">
-        Book Now
-      </button>
+      <Button text="Book Now" />
     </div>
   );
 }
