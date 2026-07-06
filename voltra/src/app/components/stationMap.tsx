@@ -2,13 +2,11 @@
 
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
-import "leaflet/dist/leaflet.css";
-
 import { ChargingStationsData } from "../data/chargingStationsData";
 
-const surabayaCenter: LatLngExpression = [-7.2575, 112.7521];
-
 export default function StationMap() {
+    const surabayaCenter: LatLngExpression = [-7.2575, 112.7521];
+
   return (
     <MapContainer
       center={surabayaCenter}

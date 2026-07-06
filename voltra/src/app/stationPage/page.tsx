@@ -24,15 +24,11 @@ export default function StationsPage() {
       <Navbar />
 
       <section className="px-4 pt-14">
-        <div className="h-[500px] rounded-[200px] shadow-lg">
+        <div className="h-[400px] rounded-[10px] shadow-lg overflow-hidden">
           <StationMap />
         </div>
 
-        <h2 className="mb-4 text-xl font-bold text-black">
-          All Charging Stations
-        </h2>
-
-        <div className="space-y-4">
+        <div className="space-y-4 pt-6">
           {ChargingStationsData.map((station) => (
             <StationCard key={station.id} station={station} />
           ))}

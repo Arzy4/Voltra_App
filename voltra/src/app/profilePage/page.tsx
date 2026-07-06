@@ -7,7 +7,10 @@ import Image from "next/image";
 import Link from "next/link";
 
 type User = {
+  fullName: string;
   email: string;
+  phoneNumber?: number;
+  password: string;
 };
 
 export default function ProfilePage() {
@@ -39,23 +42,42 @@ export default function ProfilePage() {
               <p className="font-semibold">
                 {currentUser?.email ?? "Guest User"}
               </p>
-
-              {currentUser?.email ? (
-                <Link 
-                onClick={handleLogout}
-                href="/"
-                className="text-blue-500 hover:underline">
-                  Logout
-                </Link>
-              ) : (
-                <Link
-                href="/login"
-                className="text-blue-500 hover:underline">
-                  Login
-                </Link>
-              )}
             </div>
         </section>
+
+        <div className="mt-6 space-y-4">
+          <div className="rounded-2xl bg-white p-4 shadow-sm flex items-center justify-between">
+            <h2 className="font-bold">Account Information</h2>
+            <span className="text-xl text-gray-400">&gt;</span>
+          </div>
+
+          <div className="rounded-2xl bg-white p-4 shadow-sm flex items-center justify-between">
+            <h2 className="font-bold">Booking History</h2>
+            <span className="text-xl text-gray-400">&gt;</span>
+          </div>
+
+          <div className="rounded-2xl bg-white p-4 shadow-sm flex items-center justify-between">
+            <h2 className="font-bold">Payment Method</h2>
+            <span className="text-xl text-gray-400">&gt;</span>
+          </div>
+
+          <div className="rounded-2xl bg-white p-4 shadow-sm text-center">
+            {currentUser?.email ? (
+                  <Link 
+                  onClick={handleLogout}
+                  href="/"
+                  className="font-bold hover:underline text-red-600">
+                    Logout
+                  </Link>
+                ) : (
+                  <Link
+                  href="/login"
+                  className="font-bold hover:underline text-black">
+                    Login
+                  </Link>
+                )}
+          </div>
+        </div>
 
         <Footer />
     </main>
