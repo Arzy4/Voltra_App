@@ -19,6 +19,7 @@ export default function Input({
         px-4
         py-3
         outline-none
+        bg-white
       "
     />
   );

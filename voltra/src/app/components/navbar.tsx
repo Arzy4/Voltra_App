@@ -1,7 +1,7 @@
-export default function TopNavbar() {
+export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-primary-green px-6 py-6 border-bottom-2 rounded-b-[20px]">
-      <div className="mb-3 text-white h-[8svh]">
+      <div className="mb-3 text-white h-[10svh]">
         <h1 className="text-2xl font-bold">Voltra</h1>
         <p className="text-xl">
           Smart EV Charging Booking
