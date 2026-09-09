@@ -3,6 +3,7 @@ export type chargingTypes = {
     power: number;
     total: number;
     available: number;
+    pricePerKwh: number;
 };
 
 export type station = {

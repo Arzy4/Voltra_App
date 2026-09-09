@@ -36,7 +36,7 @@ export default function LoginForm() {
         localStorage.setItem("currentUser", JSON.stringify(user));
 
         alert("Login successful!");
-        router.push("/profilePage");
+        router.push("/stationPage");
     }
 
     return(

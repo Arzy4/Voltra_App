@@ -16,10 +16,16 @@
   --text-primary: #0f172a;
   --text-secondary: #64748b;
 
-  /* Status Colors */
+  /* Stations Status Colors */
   --available: #22c55e;
-  --occupied: #ef4444;
-  --maintenance: #f59e0b;
+  --limited: #e9f50b;
+  --almostFull: #f59e0b;
+  --full: #ef4444;
+
+  /* Charging Slots Status Colors */
+  --available: #22c55e;
+  --occupied: #f59e0b;
+  --maintenance: #ef4444;
 
   /* Border & Shadow */
   --border-soft: #e2e8f0;
@@ -36,6 +42,11 @@
 
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
+
+  --color-available: var(--available);
+  --color-limited: var(--limited);
+  --color-almostFull: var(--almostFull);
+  --color-full: var(--full);
 
   --color-available: var(--available);
   --color-occupied: var(--occupied);

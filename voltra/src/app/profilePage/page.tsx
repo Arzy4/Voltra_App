@@ -65,7 +65,7 @@ export default function ProfilePage() {
             {currentUser?.email ? (
                   <Link 
                   onClick={handleLogout}
-                  href="/"
+                  href="/login"
                   className="font-bold hover:underline text-red-600">
                     Logout
                   </Link>
