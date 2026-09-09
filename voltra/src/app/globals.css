@@ -66,3 +66,106 @@ body {
   width: 100%;
   z-index: 0;
 }
+
+/* Landing Page */
+.carousel {
+  margin: 100px 0;
+  display: flex;
+  overflow: hidden;
+}
+
+.group{
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  animation: slide_left 5s infinite linear;
+  padding-right: 1em;
+}
+
+.card {
+  flex: 0 0 auto;
+  padding: 1em;
+}
+
+@keyframes slide_left {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+/* About Page */
+.intro {
+  position: relative;
+  height: 104svh;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  text-align: center;
+  margin-bottom: 60px;
+  gap: 24px;
+
+  background-image: url("/About_1.png");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  overflow: hidden;
+}
+
+.intro::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background-color: rgba(0, 40, 25, 0.65);
+
+  z-index: 10;
+}
+
+.intro h1,
+.intro p {
+  position: relative;
+  z-index: 20;
+  color: white;
+}
+
+/* Mission / Vision */
+.drives {
+  position: relative;
+  height: 90svh;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  background-image: url("/About_1.png");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  overflow: hidden;
+}
+
+.drives::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background-color: rgba(0, 40, 25, 0.65);
+
+  z-index: 0;
+}
+
+/* Everything inside stays above overlay */
+.drives > * {
+  position: relative;
+  z-index: 1;
+}
