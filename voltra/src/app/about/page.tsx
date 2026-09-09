@@ -3,7 +3,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import Button from "../components/button";
-import Footer1 from "../components/footer1";
 import { usePathname } from "next/navigation";
 import { Target, Eye } from "lucide-react";
 
@@ -97,78 +96,85 @@ export default function About() {
             </div>
         </section>
 
-            <footer className="bg-[#c2f3db] pl-16 py-12 shadow-[0_-8px_20px_rgba(0,0,0,0.15)]">
-                <div className="mb-15 max-w-[90%] mx-auto text-white">
-                    <div className="bg-primary-green px-10 py-10 flex justify-between items-center rounded-xl">
-                        <div className="flex flex-col gap-2">
-                            <h2 className="text-2xl font-bold">READY TO CHARGE SMARTER?</h2>
-                            <p className="text-lg">Sign in, find available EV Charging Stations, and reserve your next charge</p>
-                        </div>
-                        
-                        <Link href="/login">
-                            <Button text="Sign in and find nearest charging stations"/>
-                        </Link>
+        <footer className="bg-[#c2f3db] pl-16 py-12 shadow-[0_-8px_20px_rgba(0,0,0,0.15)]">
+            <div className="mb-15 max-w-[90%] mx-auto text-white">
+                <div className="bg-primary-green px-10 py-10 flex justify-between items-center rounded-xl">
+                    <div className="flex flex-col gap-2">
+                        <h2 className="text-2xl font-bold">READY TO CHARGE SMARTER?</h2>
+                        <p className="text-lg">Sign in, find available EV Charging Stations, and reserve your next charge</p>
                     </div>
+                    
+                    <Link href="/login">
+                        <Button text="Sign in and find nearest charging stations"/>
+                    </Link>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-4 gap-12 items-start max-w-7xl mx-auto">
+                {/* VOLTRA */}
+                <div className="flex flex-col gap-4">
+                    <Image
+                    src="/Voltra_Logo.png"
+                    alt="Voltra Logo"
+                    width={200}
+                    height={200}
+                    />
+
+                    <p className="text-lg  text-justify leading-relaxed max-w-[300px]">
+                    Powering your journey with smarter, simpler, and more accessible
+                    EV charging, so you can enjoy seamless booking and convenience
+                    wherever you go.
+                    </p>
                 </div>
 
-                <div className="grid grid-cols-4 gap-12 items-start max-w-7xl mx-auto">
-                    {/* VOLTRA */}
-                    <div className="flex flex-col gap-4">
-                        <Image
-                        src="/Voltra_Logo.png"
-                        alt="Voltra Logo"
-                        width={200}
-                        height={200}
-                        />
+                {/* NAVIGATION */}
+                <div className="flex flex-col items-center gap-4 pt-4">
+                    <h3 className="font-bold text-xl">
+                    Navigation
+                    </h3>
 
-                        <p className="text-lg  text-justify leading-relaxed max-w-[300px]">
-                        Powering your journey with smarter, simpler, and more accessible
-                        EV charging, so you can enjoy seamless booking and convenience
-                        wherever you go.
-                        </p>
-                    </div>
-
-                    {/* NAVIGATION */}
-                    <div className="flex flex-col items-center gap-4 pt-4">
-                        <h3 className="font-bold text-xl">
-                        Navigation
-                        </h3>
-
-                        <ul className="flex flex-col items-center gap-2">
-                        <li><Link href="/" className="hover:underline underline-offset-4 text-lg ">Home</Link></li>
-                        <li><Link href="/about" className="hover:underline underline-offset-4 text-lg ">About</Link></li>
-                        <li><Link href="/contact" className="hover:underline underline-offset-4 text-lg">Contact Us</Link></li>
-                        <li><Link href="/login" className="hover:underline underline-offset-4text-lg  text-lg ">Sign In</Link></li>
-                        </ul>
-                    </div>
-
-                    {/* SOCIAL MEDIA */}
-                    <div className="flex flex-col items-center gap-4 pt-4">
-                        <h3 className="font-bold text-xl">
-                        Social Media
-                        </h3>
-
-                        <ul className="flex flex-col items-center gap-2">
-                        <li><a href="https://www.instagram.com/rbby_rzy/" className="hover:underline underline-offset-4 text-lg ">Instagram</a></li>
-                        <li><a href="https://www.linkedin.com/in/robbyarzy" className="hover:underline underline-offset-4 text-lg ">LinkedIn</a></li>
-                        <li><a href="https://wa.me/6282232138510" className="hover:underline underline-offset-4 text-lg ">Whatsapp</a></li>
-                        <li><a href="https://github.com/Arzy4" className="hover:underline underline-offset-4 text-lg ">GitHub</a></li>
-                        </ul>
-                    </div>
-
-                    {/* LEGAL */}
-                    <div className="flex flex-col items-center gap-4 pt-4">
-                        <h3 className="font-bold text-xl">
-                        Legal
-                        </h3>
-
-                        <ul className="flex flex-col items-center gap-2">
-                        <li><Link href="/privacy" className="hover:underline underline-offset-4 text-lg ">Privacy Policy</Link></li>
-                        <li><Link href="/terms" className="hover:underline underline-offset-4 text-lg ">Terms of Service</Link></li>
-                        </ul>
-                    </div>
+                    <ul className="flex flex-col items-center gap-2">
+                    <li><Link href="/" className="hover:underline underline-offset-4 text-lg ">Home</Link></li>
+                    <li><Link href="/about" className="hover:underline underline-offset-4 text-lg ">About</Link></li>
+                    <li><Link href="/contact" className="hover:underline underline-offset-4 text-lg">Contact Us</Link></li>
+                    <li><Link href="/login" className="hover:underline underline-offset-4text-lg  text-lg ">Sign In</Link></li>
+                    </ul>
                 </div>
-            </footer>
+
+                {/* SOCIAL MEDIA */}
+                <div className="flex flex-col items-center gap-4 pt-4">
+                    <h3 className="font-bold text-xl">
+                    Social Media
+                    </h3>
+
+                    <ul className="flex flex-col items-center gap-2">
+                    <li><a href="https://www.instagram.com/rbby_rzy/" className="hover:underline underline-offset-4 text-lg ">Instagram</a></li>
+                    <li><a href="https://www.linkedin.com/in/robbyarzy" className="hover:underline underline-offset-4 text-lg ">LinkedIn</a></li>
+                    <li><a href="https://wa.me/6282232138510" className="hover:underline underline-offset-4 text-lg ">Whatsapp</a></li>
+                    <li><a href="https://github.com/Arzy4" className="hover:underline underline-offset-4 text-lg ">GitHub</a></li>
+                    </ul>
+                </div>
+
+                {/* LEGAL */}
+                <div className="flex flex-col items-center gap-4 pt-4">
+                    <h3 className="font-bold text-xl">
+                    Legal
+                    </h3>
+
+                    <ul className="flex flex-col items-center gap-2">
+                    <li><Link href="/policy" className="hover:underline underline-offset-4 text-lg ">Privacy Policy</Link></li>
+                    <li><Link href="/terms" className="hover:underline underline-offset-4 text-lg ">Terms & Conditions</Link></li>
+                    </ul>
+                </div>
+            </div>
+
+            <hr className="mr-16 mt-12" />
+
+            <div className="flex justify-between text-center pt-12 pr-16">
+                <p>Latest Update: September 9, 2026</p>
+                <p>&copy; 2026 VOLTRA. All rights reserved.</p>
+            </div>
+        </footer>
         </>
     );
 }

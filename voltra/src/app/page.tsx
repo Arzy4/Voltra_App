@@ -1,17 +1,12 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import Button from "./components/button";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { CalendarCheck, Zap, Sparkles } from "lucide-react";
-import { usePathname } from "next/navigation";
 import Navbar1 from "./components/navbar1";
 import Footer1 from "./components/footer1";
 
 export default function Home() {
-  const pathname = usePathname();
-
   return (
     <>
     <main className="min-h-screen pb-24">

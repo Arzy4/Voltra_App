@@ -1,10 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 export default function Footer1() {
+    const pathname = usePathname();
+
     return (
         <footer className="bg-[#c2f3db] pl-16 py-12 shadow-[0_-8px_20px_rgba(0,0,0,0.15)]">
-          <div className="grid grid-cols-4 gap-12 items-start max-w-7xl mx-auto">
+          <section className="grid grid-cols-4 gap-12 items-start max-w-7xl mx-auto">
 
             {/* VOLTRA */}
             <div className="flex flex-col gap-4">
@@ -57,11 +62,27 @@ export default function Footer1() {
               </h3>
 
               <ul className="flex flex-col items-center gap-2">
-                <li><Link href="/privacy" className="hover:underline underline-offset-4 text-lg ">Privacy Policy</Link></li>
-                <li><Link href="/terms" className="hover:underline underline-offset-4 text-lg ">Terms of Service</Link></li>
+                <li>
+                  <Link href="/policy" className={`${pathname === "/policy" ? "underline underline-offset-8" : "" } hover:underline underline-offset-4 text-lg`}>
+                    Privacy Policy
+                  </Link>
+                </li>
+
+                <li>
+                  <Link href="/terms" className={`${pathname === "/terms" ? "underline underline-offset-8" : "" } hover:underline underline-offset-4 text-lg`}>
+                    Terms & Conditions
+                  </Link>
+                </li>
               </ul>
             </div>
 
+          </section>
+
+          <hr className="mr-16 my-12" />
+
+          <div className="flex justify-between text-center pr-16">
+              <p>Latest Update: September 9, 2026</p>
+              <p>&copy; 2026 VOLTRA. All rights reserved.</p>
           </div>
         </footer>
     );

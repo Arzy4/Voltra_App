@@ -108,7 +108,7 @@ export default function Contact(){
 
             {/* RIGHT SIDE - 2/3 */}
             <div className="flex justify-center items-center">
-                <div className="flex flex-col gap-5 w-full max-w-4xl">
+                <div className="flex flex-col gap-5 w-full max-w-4xl pr-10">
 
                     {/* FIRST + LAST NAME */}
                     <div className="grid grid-cols-2 gap-5">
