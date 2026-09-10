@@ -273,8 +273,8 @@ export default function ProfilePage() {
         </aside>
 
         {/* RIGHT CONTENT */}
-        <section className="h-full overflow-hidden rounded-2xl bg-white shadow-sm">
-          <div className="h-full overflow-y-auto p-8">
+        <section className="hide-scrollbar h-full overflow-hidden rounded-2xl bg-white shadow-sm">
+          <div className="hide-scrollbar h-full overflow-y-auto p-8">
             {activeSection === "account" && (
               <div>
                 <div className="flex items-start justify-between gap-4">
