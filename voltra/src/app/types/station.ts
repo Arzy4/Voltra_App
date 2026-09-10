@@ -17,3 +17,13 @@ export type station = {
   chargingTypes: chargingTypes[];
   status: string;
 };
+
+export type ChargingSlot = {
+  id: number;
+  slotCode: string;
+  stationId: number;
+  chargerType: "NORMAL" | "FAST" | "ULTRA";
+  powerKw: number;
+  pricePerKwh: number;
+  status: "AVAILABLE" | "OCCUPIED" | "MAINTENANCE";
+};

@@ -1,4 +1,5 @@
 import { ChargingStationsData } from "../../data/chargingStationsData";
+import ChargingOptionCard from "../../components/chargingOptionCard";
 
 type StationDetailPageProps = {
   params: Promise<{
@@ -130,67 +131,17 @@ export default async function StationDetailPage({
                 </h2>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                    {station.chargingTypes.map((charger) => {
-                    const usedSlots = charger.total - charger.available;
-
-                    return (
-                        <div
+                    {station.chargingTypes.map((charger) => (
+                        <ChargingOptionCard
                         key={charger.type}
-                        className="flex flex-col rounded-3xl bg-[#c2f3db] p-7 shadow-lg"
-                        >
-                        <div className="flex items-start justify-between gap-4">
-                            <div>
-                            <p className="font-semibold text-primary-green">
-                                {charger.type.toUpperCase()} CHARGING
-                            </p>
-
-                            <h3 className="mt-2 text-3xl font-bold">
-                                {charger.power} kW
-                            </h3>
-                            </div>
-
-                            <span className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-primary-green">
-                            {charger.available} Available
-                            </span>
-                        </div>
-
-                        <hr className="my-6 border-primary-green/20" />
-
-                        <div>
-                            <p className="text-sm text-text-secondary">
-                            Price
-                            </p>
-
-                            <p className="mt-1 text-2xl font-bold">
-                            Rp {charger.pricePerKwh.toLocaleString("id-ID")}
-                            <span className="text-sm font-normal">
-                                {" "}/ kWh
-                            </span>
-                            </p>
-                        </div>
-
-                        <div className="mt-6">
-                            <p className="text-sm text-text-secondary">
-                            Slot Usage
-                            </p>
-
-                            <div className="mt-1 flex items-center justify-between gap-4">
-                            <p className="font-semibold">
-                                {charger.available} / {charger.total} available
-                            </p>
-
-                            <p className="text-sm">
-                                {usedSlots} in use
-                            </p>
-                            </div>
-                        </div>
-
-                        <button className="mt-8 w-full rounded-xl bg-primary-green px-6 py-3 font-semibold text-white duration-300 hover:opacity-90">
-                            View Charging Options
-                        </button>
-                        </div>
-                    );
-                    })}
+                        stationId={station.id}
+                        type={charger.type}
+                        power={charger.power}
+                        total={charger.total}
+                        available={charger.available}
+                        pricePerKwh={charger.pricePerKwh}
+                        />
+                    ))}
                 </div>
             </section>
         </main>

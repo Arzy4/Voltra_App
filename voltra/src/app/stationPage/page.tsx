@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import Input from "../components/input";
 import StationCard from "../components/stationCard";
 import { ChargingStationsData } from "../data/chargingStationsData";
+import Footer from "../components/footer";
 
 const StationMap = dynamic(
   () => import("../components/stationMap"),
@@ -24,7 +25,7 @@ export default function StationsPage() {
     useState<number | null>(null);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [panelHeight, setPanelHeight] = useState(45);
+  const [panelHeight, setPanelHeight] = useState(47);
 
   const filteredStations = ChargingStationsData.filter((station) => {
     const search = searchTerm.trim().toLowerCase();
@@ -39,7 +40,7 @@ export default function StationsPage() {
 
   const isDragging = useRef(false);
   const startY = useRef(0);
-  const startHeight = useRef(45);
+  const startHeight = useRef(47);
 
   const handlePointerDown = (
     e: React.PointerEvent<HTMLDivElement>
@@ -84,18 +85,19 @@ export default function StationsPage() {
     }
 
     if (panelHeight < 25) {
-      setPanelHeight(8);
+      setPanelHeight(15);
     } else if (panelHeight < 65) {
-      setPanelHeight(45);
+      setPanelHeight(47);
     } else {
       setPanelHeight(80);
     }
   };
 
   return (
+    <>
     <main className="relative h-screen w-full overflow-hidden">
       {/* Full-screen map */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 h-[90vh]">
         <StationMap selectedStationId={selectedStationId} />
       </div>
 
@@ -143,6 +145,9 @@ export default function StationsPage() {
           </div>
         </div>
       </div>
+
+      <Footer />
     </main>
+    </>
   );
 }

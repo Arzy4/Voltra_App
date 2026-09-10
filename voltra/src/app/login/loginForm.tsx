@@ -11,7 +11,7 @@ export default function LoginForm() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    function handleLogin(e: React.FormEvent) {
+    async function handleLogin(e: React.FormEvent) {
         e.preventDefault();
 
         if (!email || !password) {
@@ -19,25 +19,49 @@ export default function LoginForm() {
             return;
         }
 
-        const storedUser = localStorage.getItem("user");
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-        if (!storedUser) {
-            alert("No user found. Please register first.");
+            if (!apiUrl) {
+            throw new Error("NEXT_PUBLIC_API_URL is not defined.");
+            }
+
+            const response = await fetch(`${apiUrl}/auth/login`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                email,
+                password,
+            }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+            alert(result.message || "Invalid email or password.");
             return;
+            }
+
+            localStorage.setItem("accessToken", result.accessToken);
+            localStorage.setItem("refreshToken", result.refreshToken);
+
+            if (result.user) {
+            localStorage.setItem(
+                "currentUser",
+                JSON.stringify(result.user)
+            );
+            }
+
+            alert("Login successful!");
+
+            router.push("/stationPage");
+        } catch (error) {
+            console.error("Login failed:", error);
+            alert("Failed to login. Please try again.");
         }
-
-        const user = JSON.parse(storedUser);
-
-        if (user.email !== email || user.password !== password) {
-            alert("Invalid email or password!");
-            return;
         }
-
-        localStorage.setItem("currentUser", JSON.stringify(user));
-
-        alert("Login successful!");
-        router.push("/stationPage");
-    }
 
     return(
         <form onSubmit={handleLogin} className="flex flex-col gap-4 placeholder:text-white">
