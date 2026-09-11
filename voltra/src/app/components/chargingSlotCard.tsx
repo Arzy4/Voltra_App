@@ -110,6 +110,7 @@ export default function ChargingSlotCard({
             <input
               type="date"
               value={selectedDate}
+              min={new Date().toISOString().split("T")[0]}
               onChange={(e) => setSelectedDate(e.target.value)}
               className="w-full rounded-xl border border-border-soft bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-primary-green"
             />

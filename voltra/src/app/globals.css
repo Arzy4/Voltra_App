@@ -21,11 +21,18 @@
   --limited: #e9f50b;
   --almostFull: #f59e0b;
   --full: #ef4444;
+  --maintenance1: #991b1b;
 
   /* Charging Slots Status Colors */
   --available: #22c55e;
   --occupied: #f59e0b;
-  --maintenance: #ef4444;
+  --maintenance2: #ef4444;
+
+  /* Payment Status Colors */
+  --paid: #22c55e;
+  --pending: #e9f50b;
+  --failed: #ef4444;
+  --refunded: #ffffffb0;
 
   /* Border & Shadow */
   --border-soft: #e2e8f0;
@@ -47,10 +54,16 @@
   --color-limited: var(--limited);
   --color-almostFull: var(--almostFull);
   --color-full: var(--full);
+  --color-maintenance1: var(--maintenance1);
 
   --color-available: var(--available);
   --color-occupied: var(--occupied);
-  --color-maintenance: var(--maintenance);
+  --color-maintenance2: var(--maintenance2);
+
+  --color-paid: var(--paid);
+  --color-pending: var(--pending);
+  --color-failed: var(--failed);
+  --color-refunded: var(--refunded);
 
   --color-border-soft: var(--border-soft);
 

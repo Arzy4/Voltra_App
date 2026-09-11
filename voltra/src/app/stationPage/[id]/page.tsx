@@ -1,5 +1,36 @@
-import { ChargingStationsData } from "../../data/chargingStationsData";
 import ChargingOptionCard from "../../components/chargingOptionCard";
+
+type ChargingSlot = {
+  id: number;
+  stationId: number;
+  slotCode: string;
+  chargerType: "NORMAL" | "FAST" | "ULTRA";
+  powerKw: number;
+  pricePerKwh: number;
+  status: "AVAILABLE" | "OCCUPIED" | "MAINTENANCE";
+};
+
+type Station = {
+  id: number;
+  name: string;
+  location: string;
+  area: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  description?: string;
+  status: string;
+  imageUrl?: string | null;
+  slots: ChargingSlot[];
+};
+
+type DisplayStatus =
+  | "Available"
+  | "Limited"
+  | "Almost Full"
+  | "Full"
+  | "Maintenance"
+  | "Inactive";
 
 type StationDetailPageProps = {
   params: Promise<{
@@ -10,29 +41,41 @@ type StationDetailPageProps = {
 export default async function StationDetailPage({
     params,
 }: StationDetailPageProps) {
-    const getStatusColor = (status: string) => {
-        switch (status.toLowerCase()) {
-        case "available":
-            return "bg-available text-white";
-
-        case "limited":
-            return "bg-limited text-yellow-900";
-
-        case "almost full":
-            return "bg-almostFull text-orange-900";
-
-        case "full":
-            return "bg-full text-white";
-
-        default:
-            return "bg-gray-300 text-gray-700";
-        }
+    const statusStyles: Record<DisplayStatus, string> = {
+        Available: "bg-available text-white",
+        Limited: "bg-limited text-yellow-900",
+        "Almost Full": "bg-almostFull text-orange-900",
+        Full: "bg-full text-white",
+        Maintenance: "bg-maintenance1 text-white",
+        Inactive: "bg-gray-500 text-white",
     };
 
     const { id } = await params;
-    const station = ChargingStationsData.find(
-        (station) => station.id === Number(id)
-    );
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    if (!apiUrl) {
+        throw new Error("NEXT_PUBLIC_API_URL is not defined.");
+    }
+
+    let station: Station | null = null;
+
+    try {
+        const response = await fetch(`${apiUrl}/stations/${id}`, {
+            cache: "no-store",
+    });
+
+    if (!response.ok) {
+        throw new Error(
+            `Failed to fetch station: ${response.status}`
+        );
+    }
+
+    const result = await response.json();
+
+    station = result.data ?? result;
+    } catch (error) {
+    console.error("Failed to fetch station:", error);
+    }
 
     if (!station) {
         return(
@@ -44,17 +87,86 @@ export default async function StationDetailPage({
         );
     }
 
-    const totalSlots = station.chargingTypes.reduce(
-        (sum, charger) => sum + charger.total,
-        0
+    const chargerTypes = ["NORMAL", "FAST", "ULTRA"] as const;
+
+    const chargingTypes = chargerTypes
+    .map((chargerType) => {
+        const matchingSlots = station.slots.filter(
+        (slot) => slot.chargerType === chargerType
+        );
+
+        if (matchingSlots.length === 0) {
+        return null;
+        }
+
+        const availableSlotsForType = matchingSlots.filter(
+        (slot) => slot.status === "AVAILABLE"
+        );
+
+        const firstSlot = matchingSlots[0];
+
+        return {
+        type:
+            chargerType.charAt(0) +
+            chargerType.slice(1).toLowerCase(),
+
+        power: Number(firstSlot.powerKw),
+
+        pricePerKwh: Number(firstSlot.pricePerKwh),
+
+        total: matchingSlots.length,
+
+        available: availableSlotsForType.length,
+        };
+    })
+    .filter(
+        (
+        charger
+        ): charger is {
+        type: string;
+        power: number;
+        pricePerKwh: number;
+        total: number;
+        available: number;
+        } => charger !== null
     );
 
-    const availableSlots = station.chargingTypes.reduce(
-        (sum, charger) => sum + charger.available,
-        0
-    );
+    const totalSlots = station.slots.length;
+
+    const availableSlots = station.slots.filter(
+    (slot) => slot.status === "AVAILABLE"
+    ).length;
 
     const usedSlots = totalSlots - availableSlots;
+
+    const getDisplayStatus = (): DisplayStatus => {
+        if (station.status === "MAINTENANCE") {
+            return "Maintenance";
+        }
+
+        if (station.status === "INACTIVE") {
+            return "Inactive";
+        }
+
+        if (totalSlots === 0 || availableSlots === 0) {
+            return "Full";
+        }
+
+        const availabilityPercentage =
+            (availableSlots / totalSlots) * 100;
+
+        if (availabilityPercentage <= 25) {
+            return "Almost Full";
+        }
+
+        if (availabilityPercentage <= 50) {
+            return "Limited";
+        }
+
+        return "Available";
+    };
+
+    const displayStatus: DisplayStatus = getDisplayStatus();
 
     return (
         <main className="min-h-screen bg-[#e3fff1] px-8 py-12 lg:px-20">
@@ -75,9 +187,12 @@ export default async function StationDetailPage({
                     </p>
 
                     <div className="mt-6">
-                    <span className={`rounded-full px-6 py-2 text-sm font-semibold ${getStatusColor(
-                        station.status)}`}>
-                        {station.status}
+                    <span
+                        className={`w-full max-w-[110px] rounded-full px-6 py-4 text-center text-md font-semibold ${
+                        statusStyles[displayStatus]
+                        }`}
+                    >
+                        {displayStatus}
                     </span>
                     </div>
                 </div>
@@ -131,7 +246,7 @@ export default async function StationDetailPage({
                 </h2>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                    {station.chargingTypes.map((charger) => (
+                    {chargingTypes.map((charger) => (
                         <ChargingOptionCard
                         key={charger.type}
                         stationId={station.id}

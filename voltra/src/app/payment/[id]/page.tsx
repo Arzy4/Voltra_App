@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { apiFetch } from "../../lib/apiFetch";
+import { useRouter } from "next/navigation";
 
 type BookingDetail = {
   id: number;
@@ -24,6 +25,7 @@ type BookingDetail = {
 };
 
 export default function PaymentPage() {
+    const router = useRouter();
     const params = useParams();
     const bookingId = params.id as string;
 
@@ -87,6 +89,79 @@ export default function PaymentPage() {
           </p>
         </main>
       );
+    }
+
+    async function handlePay() {
+      try {
+        if (!booking) return;
+
+        if (!fullName || !address || !city || !postalCode) {
+          alert("Please complete your billing address.");
+          return;
+        }
+
+        if (
+          paymentMethod === "CARD" &&
+          (!cardholderName || !cardNumber || !expiryDate || !cvv)
+        ) {
+          alert("Please complete your card details.");
+          return;
+        }
+
+        // 1. Create payment
+        const createResponse = await apiFetch("/payments", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            bookingId: booking.id,
+            paymentMethod: paymentMethod,
+          }),
+        });
+
+        const createResult = await createResponse.json();
+
+        if (!createResponse.ok) {
+          throw new Error(
+            Array.isArray(createResult.message)
+              ? createResult.message.join(", ")
+              : createResult.message || "Failed to create payment."
+          );
+        }
+
+        const payment = createResult.data;
+
+        // 2. Simulate successful payment
+        const completeResponse = await apiFetch(
+          `/payments/${payment.id}/complete`,
+          {
+            method: "PATCH",
+          }
+        );
+
+        const completeResult = await completeResponse.json();
+
+        if (!completeResponse.ok) {
+          throw new Error(
+            Array.isArray(completeResult.message)
+              ? completeResult.message.join(", ")
+              : completeResult.message || "Failed to complete payment."
+          );
+        }
+
+        alert("Payment successful! Your booking has been confirmed.");
+
+        router.push(`/bookingsPage/${booking.id}`);
+      } catch (error) {
+        console.error("Payment failed:", error);
+
+        alert(
+          error instanceof Error
+            ? error.message
+            : "Payment failed."
+        );
+      }
     }
 
 return (
@@ -327,6 +402,7 @@ return (
 
                   <button
                     type="button"
+                    onClick={handlePay}
                     className="mt-10 w-full rounded-full bg-primary-green px-6 py-4 font-semibold text-white transition hover:opacity-90"
                   >
                     Pay Rp{" "}

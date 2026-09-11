@@ -1,12 +1,34 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-
 import Input from "../components/input";
 import StationCard from "../components/stationCard";
-import { ChargingStationsData } from "../data/chargingStationsData";
 import Footer from "../components/footer";
+
+type ChargingSlot = {
+  id: number;
+  stationId: number;
+  slotCode: string;
+  chargerType: "NORMAL" | "FAST" | "ULTRA";
+  powerKw: number;
+  pricePerKwh: number;
+  status: "AVAILABLE" | "OCCUPIED" | "MAINTENANCE";
+};
+
+type Station = {
+  id: number;
+  name: string;
+  location: string;
+  area: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  status: "AVAILABLE" | "MAINTENANCE" | "INACTIVE";
+  description?: string;
+  imageUrl?: string | null;
+  slots: ChargingSlot[];
+};
 
 const StationMap = dynamic(
   () => import("../components/stationMap"),
@@ -21,13 +43,60 @@ const StationMap = dynamic(
 );
 
 export default function StationsPage() {
+  type DisplayStatus =
+  | "Available"
+  | "Limited"
+  | "Almost Full"
+  | "Full"
+  | "Maintenance"
+  | "Inactive";
+
+function getStationDisplayStatus(
+  station: Station
+): DisplayStatus {
+  if (station.status === "MAINTENANCE") {
+    return "Maintenance";
+  }
+
+  if (station.status === "INACTIVE") {
+    return "Inactive";
+  }
+
+  const totalSlots = station.slots.length;
+
+  const availableSlots = station.slots.filter(
+    (slot) => slot.status === "AVAILABLE"
+  ).length;
+
+  if (totalSlots === 0 || availableSlots === 0) {
+    return "Full";
+  }
+
+  const availabilityPercentage =
+    (availableSlots / totalSlots) * 100;
+
+  if (availabilityPercentage <= 25) {
+    return "Almost Full";
+  }
+
+  if (availabilityPercentage <= 50) {
+    return "Limited";
+  }
+
+  return "Available";
+}
+
+  const [stations, setStations] = useState<Station[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [selectedStationId, setSelectedStationId] =
     useState<number | null>(null);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [panelHeight, setPanelHeight] = useState(47);
 
-  const filteredStations = ChargingStationsData.filter((station) => {
+  const filteredStations = stations.filter((station) => {
     const search = searchTerm.trim().toLowerCase();
 
     return (
@@ -93,6 +162,45 @@ export default function StationsPage() {
     }
   };
 
+  useEffect(() => {
+    const fetchStations = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+        if (!apiUrl) {
+          throw new Error("NEXT_PUBLIC_API_URL is not defined.");
+        }
+
+        const response = await fetch(`${apiUrl}/stations`);
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch stations: ${response.status}`
+          );
+        }
+
+        const result = await response.json();
+
+        setStations(result.data ?? result);
+      } catch (error) {
+        console.error("Failed to fetch stations:", error);
+
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Failed to load charging stations."
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStations();
+  }, []);
+
   return (
     <>
     <main className="relative h-screen w-full overflow-hidden">
@@ -131,17 +239,32 @@ export default function StationsPage() {
         </div>
 
         {/* Scrollable cards */}
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6">
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredStations.map((station) => (
-              <StationCard
-                key={station.id}
-                station={station}
-                onViewMap={() =>
-                  setSelectedStationId(station.id)
-                }
-              />
-            ))}
+        <div className="hide-scrollbar min-h-0 flex-1 overflow-y-auto px-6 pb-6">
+          <div className="hide-scrollbar grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {isLoading ? (
+              <p className="col-span-full py-10 text-center text-text-secondary">
+                Loading charging stations...
+              </p>
+            ) : error ? (
+              <p className="col-span-full py-10 text-center text-red-500">
+                {error}
+              </p>
+            ) : filteredStations.length === 0 ? (
+              <p className="col-span-full py-10 text-center text-text-secondary">
+                No charging stations found.
+              </p>
+            ) : (
+              filteredStations.map((station) => (
+                <StationCard
+                  key={station.id}
+                  station={station}
+                  displayStatus={getStationDisplayStatus(station)}
+                  onViewMap={() =>
+                    setSelectedStationId(station.id)
+                  }
+                />
+              ))
+            )}
           </div>
         </div>
       </div>

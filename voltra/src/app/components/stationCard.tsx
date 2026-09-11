@@ -1,31 +1,83 @@
 import Link from "next/link";
-import { station } from "../types/station";
 import Card from "./card";
 
+type ChargingSlot = {
+  id: number;
+  stationId: number;
+  slotCode: string;
+  chargerType: "NORMAL" | "FAST" | "ULTRA";
+  powerKw: number;
+  pricePerKwh: number;
+  status: "AVAILABLE" | "OCCUPIED" | "MAINTENANCE";
+};
+
+type Station = {
+  id: number;
+  name: string;
+  location: string;
+  area: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  status: "AVAILABLE" | "MAINTENANCE" | "INACTIVE";
+  description?: string;
+  imageUrl?: string | null;
+  slots: ChargingSlot[];
+};
+
+type DisplayStatus =
+  | "Available"
+  | "Limited"
+  | "Almost Full"
+  | "Full"
+  | "Maintenance"
+  | "Inactive";
+
 type StationCardProps = {
-  station: station;
+  station: Station;
+  displayStatus: DisplayStatus;
   onViewMap: () => void;
 };
 
-export default function StationCard({ station, onViewMap }: StationCardProps) {
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "available":
-        return "bg-available text-white";
-
-      case "limited":
-        return "bg-limited text-yellow-900";
-
-      case "almost full":
-        return "bg-almostFull text-orange-900";
-
-      case "full":
-        return "bg-full text-white";
-
-      default:
-        return "bg-gray-300 text-gray-700";
-      }
+export default function StationCard({ station, displayStatus, onViewMap }: StationCardProps) {
+  const statusStyles = {
+    Available: "bg-available text-white",
+    Limited: "bg-limited text-yellow-900",
+    "Almost Full": "bg-almostFull text-orange-900",
+    Full: "bg-full text-white",
+    Maintenance: "bg-maintenance1",
+    Inactive: "bg-gray-500",
   };
+
+  const chargerTypes = ["NORMAL", "FAST", "ULTRA"] as const;
+
+  const chargerSummary = chargerTypes
+    .map((type) => {
+      const matchingSlots = station.slots.filter(
+        (slot) => slot.chargerType === type
+      );
+
+      if (matchingSlots.length === 0) return null;
+
+      return {
+        type: type.charAt(0) + type.slice(1).toLowerCase(),
+        power: matchingSlots[0].powerKw,
+        total: matchingSlots.length,
+        available: matchingSlots.filter(
+          (slot) => slot.status === "AVAILABLE"
+        ).length,
+      };
+    })
+    .filter(
+      (
+        charger
+      ): charger is {
+        type: string;
+        power: number;
+        total: number;
+        available: number;
+      } => charger !== null
+    );
 
   return (
     <Card>
@@ -36,32 +88,37 @@ export default function StationCard({ station, onViewMap }: StationCardProps) {
             <p className="text-sm">{station.area}</p>
           </div>
 
-          <span className={`w-full max-w-[110px] rounded-full px-4 py-1 text-center text-xs font-semibold ${getStatusColor(
-            station.status
-          )}`}>
-            {station.status}
+          <span
+            className={`w-full max-w-[110px] rounded-full px-4 py-1 text-center text-xs font-semibold ${
+              statusStyles[displayStatus]
+            }`}
+          >
+            {displayStatus}
           </span>
         </div>
 
         <hr className="my-3 border-green-300"></hr>
 
         <div className="space-y-2 text-sm text-white">
-          {station.chargingTypes.map((charger) => (
-              <div
+           {chargerSummary.map((charger) => (
+            <div
               key={charger.type}
               className="flex items-center justify-between"
-              >
+            >
               <div>
-                  <p className="font-bold">{charger.type} Charging</p>
-                  <p className="text-xs">
+                <p className="font-bold">
+                  {charger.type} Charging
+                </p>
+
+                <p className="text-xs">
                   {charger.power} kW
-                  </p>
+                </p>
               </div>
 
               <span>
-                  {charger.available}/{charger.total}
+                {charger.available}/{charger.total}
               </span>
-              </div>
+            </div>
           ))}
           </div>
 
