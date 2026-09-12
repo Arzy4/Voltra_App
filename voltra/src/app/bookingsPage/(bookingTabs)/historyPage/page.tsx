@@ -55,7 +55,7 @@ export default function HistoryPage() {
     endTime <= now ||
     ["COMPLETED", "CANCELLED"].includes(booking.status)
   );
-});
+}); 
 
   return (
     <section className="px-6 py-8">

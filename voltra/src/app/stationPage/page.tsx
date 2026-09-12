@@ -206,7 +206,7 @@ function getStationDisplayStatus(
     <main className="relative h-screen w-full overflow-hidden">
       {/* Full-screen map */}
       <div className="absolute inset-0 h-[90vh]">
-        <StationMap selectedStationId={selectedStationId} />
+        <StationMap selectedStationId={selectedStationId} stations={stations} />
       </div>
 
       {/* Search bar */}

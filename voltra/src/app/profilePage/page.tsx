@@ -12,6 +12,7 @@ type User = {
   fullName: string;
   email: string;
   phoneNumber?: string;
+  role: "USER" | "ADMIN";
 };
 
 type Payment = {
@@ -22,6 +23,45 @@ type Payment = {
   paymentMethod: "CASH" | "CARD" | "E_WALLET";
   createdAt: string;
   updatedAt: string;
+};
+
+type ChargingSlot = {
+  id: number;
+  stationId: number;
+  slotCode: string;
+  chargerType: "NORMAL" | "FAST" | "ULTRA";
+  powerKw: number;
+  pricePerKwh: number;
+  status: "AVAILABLE" | "OCCUPIED" | "MAINTENANCE";
+};
+
+type Station = {
+  id: number;
+  name: string;
+  location: string;
+  area: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  description?: string;
+  status: "AVAILABLE" | "MAINTENANCE" | "INACTIVE";
+  imageUrl?: string | null;
+  slots: ChargingSlot[];
+};
+
+const CHARGER_DEFAULTS = {
+  NORMAL: {
+    powerKw: 22,
+    pricePerKwh: 2500,
+  },
+  FAST: {
+    powerKw: 60,
+    pricePerKwh: 3750,
+  },
+  ULTRA: {
+    powerKw: 150,
+    pricePerKwh: 5500,
+  },
 };
 
 export default function ProfilePage() {
@@ -38,6 +78,24 @@ export default function ProfilePage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [isPaymentsLoading, setIsPaymentsLoading] = useState(false);
 
+  const [stations, setStations] = useState<Station[]>([]);
+  const [isStationsLoading, setIsStationsLoading] = useState(false);
+  const [stationSearch, setStationSearch] = useState("");
+  const [isAddStationOpen, setIsAddStationOpen] = useState(false);
+
+  const [stationForm, setStationForm] = useState({
+    name: "",
+    location: "",
+    area: "",
+    address: "",
+    latitude: "",
+    longitude: "",
+    status: "AVAILABLE" as "AVAILABLE" | "MAINTENANCE" | "INACTIVE",
+    normalAmount: "0",
+    fastAmount: "0",
+    ultraAmount: "0",
+  });
+
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -52,7 +110,13 @@ export default function ProfilePage() {
   const [language, setLanguage] = useState("EN");
 
   const [activeSection, setActiveSection] = useState<
-    "account" | "paymentHistory" | "paymentMethods" | "security" | "preferences"
+    | "account"
+    | "paymentHistory"
+    | "paymentMethods"
+    | "security"
+    | "preferences"
+    | "manageStations"
+    | "manageSlots"
   >("account");
 
   useEffect(() => {
@@ -87,6 +151,34 @@ export default function ProfilePage() {
       fetchCurrentUser();
     }
   }, []);
+
+  useEffect(() => {
+    const fetchStations = async () => {
+      if (activeSection !== "manageStations") return;
+
+      try {
+        setIsStationsLoading(true);
+
+        const response = await apiFetch("/stations");
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            result.message || "Failed to retrieve charging stations."
+          );
+        }
+
+        setStations(result.data ?? result);
+      } catch (error) {
+        console.error("Failed to retrieve charging stations:", error);
+        setStations([]);
+      } finally {
+        setIsStationsLoading(false);
+      }
+    };
+
+    fetchStations();
+  }, [activeSection]);
 
   useEffect(() => {
     const fetchPayments = async () => {
@@ -289,6 +381,173 @@ export default function ProfilePage() {
     }
   }, []);
 
+  const filteredStations = stations.filter((station) => {
+    const search = stationSearch.trim().toLowerCase();
+
+    return (
+      station.name.toLowerCase().includes(search) ||
+      station.location.toLowerCase().includes(search) ||
+      station.area.toLowerCase().includes(search) ||
+      station.address.toLowerCase().includes(search)
+    );
+  });
+
+  async function handleCreateStation() {
+    if (
+      !stationForm.name.trim() ||
+      !stationForm.location.trim() ||
+      !stationForm.area.trim() ||
+      !stationForm.address.trim() ||
+      !stationForm.latitude.trim() ||
+      !stationForm.longitude.trim()
+    ) {
+      alert("Please fill in all required station fields.");
+      return;
+    }
+
+    try {
+      const stationData = {
+        name: stationForm.name.trim(),
+        location: stationForm.location.trim(),
+        area: stationForm.area.trim(),
+        address: stationForm.address.trim(),
+        latitude: stationForm.latitude,
+        longitude: stationForm.longitude,
+        status: stationForm.status,
+      };
+
+      const response = await apiFetch("/stations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(stationData),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          Array.isArray(result.message)
+            ? result.message.join(", ")
+            : result.message || "Failed to create charging station."
+        );
+      }
+
+      const createdStation = result.data ?? result;
+      const stationId = createdStation.id;
+      const slotRequests: Promise<Response>[] = [];
+
+      const normalAmount = Number(stationForm.normalAmount);
+      const fastAmount = Number(stationForm.fastAmount);
+      const ultraAmount = Number(stationForm.ultraAmount);
+      
+      // Normal Loop
+      for (let i = 1; i <= normalAmount; i++) {
+        slotRequests.push(
+          apiFetch("/charging-slots", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              slotCode: `ST${stationId}-N${String(i).padStart(2, "0")}`,
+              stationId,
+              chargerType: "NORMAL",
+              powerKw: CHARGER_DEFAULTS.NORMAL.powerKw,
+              pricePerKwh: CHARGER_DEFAULTS.NORMAL.pricePerKwh,
+              status: "AVAILABLE",
+            }),
+          })
+        );
+      }
+
+      // Fast Loop
+      for (let i = 1; i <= fastAmount; i++) {
+        slotRequests.push(
+          apiFetch("/charging-slots", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              slotCode: `ST${stationId}-F${String(i).padStart(2, "0")}`,
+              stationId,
+              chargerType: "FAST",
+              powerKw: CHARGER_DEFAULTS.FAST.powerKw,
+              pricePerKwh: CHARGER_DEFAULTS.FAST.pricePerKwh,
+              status: "AVAILABLE",
+            }),
+          })
+        );
+      }
+
+      // Ultra Loop
+      for (let i = 1; i <= ultraAmount; i++) {
+        slotRequests.push(
+          apiFetch("/charging-slots", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              slotCode: `ST${stationId}-U${String(i).padStart(2, "0")}`,
+              stationId,
+              chargerType: "ULTRA",
+              powerKw: CHARGER_DEFAULTS.ULTRA.powerKw,
+              pricePerKwh: CHARGER_DEFAULTS.ULTRA.pricePerKwh,
+              status: "AVAILABLE",
+            }),
+          })
+        );
+      }
+
+      const slotResponses = await Promise.all(slotRequests);
+      const failedSlotResponse = slotResponses.find(
+        (response) => !response.ok
+      );
+
+      if (failedSlotResponse) {
+        throw new Error(
+          "Station was created, but some charging slots failed to create."
+        );
+      }
+
+      alert("Charging station and charging slots created successfully!");
+
+      setIsAddStationOpen(false);
+
+      setStationForm({
+        name: "",
+        location: "",
+        area: "",
+        address: "",
+        latitude: "",
+        longitude: "",
+        status: "AVAILABLE",
+        normalAmount: "0",
+        fastAmount: "0",
+        ultraAmount: "0",
+      });
+
+      const stationsResponse = await apiFetch("/stations");
+      const stationsResult = await stationsResponse.json();
+
+      if (stationsResponse.ok) {
+        setStations(stationsResult.data ?? stationsResult);
+      }
+
+    } catch (error) {
+      console.error("Failed to create charging station:", error);
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to create charging station."
+      );
+    }
+  }
+
   return (
     <main className="h-screen overflow-hidden bg-background">
     <div className="mx-auto flex h-full max-w-6xl flex-col px-6 py-10">
@@ -328,6 +587,32 @@ export default function ProfilePage() {
             >
               Account Information
             </button>
+
+            {currentUser?.role === "ADMIN" && (
+              <>
+                <button
+                  onClick={() => setActiveSection("manageStations")}
+                  className={`w-full rounded-lg border-l-4 px-4 py-3 text-left transition ${
+                    activeSection === "manageStations"
+                      ? "border-primary-green bg-[#c2f3db] font-semibold text-primary-green"
+                      : "border-transparent hover:bg-gray-50"
+                  }`}
+                >
+                  Manage Stations
+                </button>
+
+                <button
+                  onClick={() => setActiveSection("manageSlots")}
+                  className={`w-full rounded-lg border-l-4 px-4 py-3 text-left transition ${
+                    activeSection === "manageSlots"
+                      ? "border-primary-green bg-[#c2f3db] font-semibold text-primary-green"
+                      : "border-transparent hover:bg-gray-50"
+                  }`}
+                >
+                  Manage Charging Slots
+                </button>
+              </>
+            )}
 
             <button
               onClick={() => setActiveSection("paymentHistory")}
@@ -516,6 +801,124 @@ export default function ProfilePage() {
                     >
                       Save Update
                     </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeSection === "manageStations" && (
+              <div>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h2 className="text-2xl font-bold text-primary-green">
+                      Manage Charging Stations
+                    </h2>
+
+                    <p className="mt-2 text-text-secondary">
+                      Create, update, and manage VOLTRA charging stations.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsAddStationOpen(true)}
+                    className="rounded-lg bg-primary-green px-5 py-3 font-semibold text-white transition hover:opacity-90"
+                  >
+                    + Add Station
+                  </button>
+                </div>
+
+                <div className="mt-8">
+                  <input
+                    type="text"
+                    value={stationSearch}
+                    onChange={(e) => setStationSearch(e.target.value)}
+                    placeholder="Search charging stations..."
+                    className="w-full rounded-xl border border-border-soft px-4 py-3 outline-none transition focus:border-primary-green"
+                  />
+                </div>
+
+                {isStationsLoading ? (
+                  <div className="mt-6 rounded-xl border border-border-soft p-6 text-center">
+                    <p className="text-text-secondary">
+                      Loading charging stations...
+                    </p>
+                  </div>
+                ) : filteredStations.length === 0 ? (
+                  <div className="mt-6 rounded-xl border border-border-soft p-6 text-center">
+                    <p className="font-semibold">
+                      No Charging Stations
+                    </p>
+
+                    <p className="mt-2 text-sm text-text-secondary">
+                      No charging stations are available yet.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-6 space-y-4">
+                    {filteredStations.map((station) => (
+                      <div
+                        key={station.id}
+                        className="rounded-xl border border-border-soft p-5"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <h3 className="text-lg font-bold">
+                              {station.name}
+                            </h3>
+
+                            <p className="mt-1 text-sm text-text-secondary">
+                              {station.location} · {station.area}
+                            </p>
+
+                            <p className="mt-1 text-sm text-text-secondary">
+                              {station.address}
+                            </p>
+                          </div>
+
+                          <span
+                            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                              station.status === "AVAILABLE"
+                                ? "bg-[#c2f3db] text-primary-green"
+                                : station.status === "MAINTENANCE"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-gray-100 text-gray-600"
+                            }`}
+                          >
+                            {station.status}
+                          </span>
+                        </div>
+
+                        <div className="mt-5 flex items-center justify-between">
+                          <p className="text-sm font-semibold">
+                            {station.slots.length} Charging Slots
+                          </p>
+
+                          <div className="flex gap-2">
+                            <Link
+                              href={`/stationPage/${station.id}`}
+                              className="rounded-lg border border-border-soft px-4 py-2 text-sm font-semibold transition hover:bg-gray-50"
+                            >
+                              View
+                            </Link>
+
+                            <button
+                              type="button"
+                              className="rounded-lg border border-primary-green px-4 py-2 text-sm font-semibold text-primary-green transition hover:bg-[#c2f3db]"
+                            >
+                              Edit
+                            </button>
+
+                            <button
+                              type="button"
+                              className="rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -987,6 +1390,264 @@ export default function ProfilePage() {
         </section>
       </div>
     </div>
+
+    {isAddStationOpen && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 pb-12">
+        <div className="hide-scrollbar h-[80vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-8 shadow-xl">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-primary-green">
+                Add Charging Station
+              </h2>
+
+              <p className="mt-2 text-sm text-text-secondary">
+                Create a new VOLTRA charging station.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsAddStationOpen(false)}
+              className="text-2xl text-gray-400 transition hover:text-black"
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="mt-8 grid gap-5 md:grid-cols-2">
+            <div>
+              <label className="text-sm font-semibold">
+                Station Name
+              </label>
+
+              <input
+                type="text"
+                value={stationForm.name}
+                onChange={(e) =>
+                  setStationForm({
+                    ...stationForm,
+                    name: e.target.value,
+                  })
+                }
+                placeholder="e.g. Tunjungan Plaza 6"
+                className="mt-2 w-full rounded-lg border border-border-soft px-4 py-3 outline-none focus:border-primary-green"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-semibold">
+                Location
+              </label>
+
+              <input
+                type="text"
+                value={stationForm.location}
+                onChange={(e) =>
+                  setStationForm({
+                    ...stationForm,
+                    location: e.target.value,
+                  })
+                }
+                placeholder="e.g. Kedungdoro, Tegalsari"
+                className="mt-2 w-full rounded-lg border border-border-soft px-4 py-3 outline-none focus:border-primary-green"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-semibold">
+                Area
+              </label>
+
+              <input
+                type="text"
+                value={stationForm.area}
+                onChange={(e) =>
+                  setStationForm({
+                    ...stationForm,
+                    area: e.target.value,
+                  })
+                }
+                placeholder="e.g. Tegalsari"
+                className="mt-2 w-full rounded-lg border border-border-soft px-4 py-3 outline-none focus:border-primary-green"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-semibold">
+                Status
+              </label>
+
+              <select
+                value={stationForm.status}
+                onChange={(e) =>
+                  setStationForm({
+                    ...stationForm,
+                    status: e.target.value as
+                      | "AVAILABLE"
+                      | "MAINTENANCE"
+                      | "INACTIVE",
+                  })
+                }
+                className="mt-2 w-full rounded-lg border border-border-soft bg-white px-4 py-3 outline-none focus:border-primary-green"
+              >
+                <option value="AVAILABLE">Available</option>
+                <option value="MAINTENANCE">Maintenance</option>
+                <option value="INACTIVE">Inactive</option>
+              </select>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="text-sm font-semibold">
+                Address
+              </label>
+
+              <input
+                type="text"
+                value={stationForm.address}
+                onChange={(e) =>
+                  setStationForm({
+                    ...stationForm,
+                    address: e.target.value,
+                  })
+                }
+                placeholder="e.g. Jl. Basuki Rahmat No.8-12, Kedungdoro, Tegalsari, Surabaya"
+                className="mt-2 w-full rounded-lg border border-border-soft px-4 py-3 outline-none focus:border-primary-green"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-semibold">
+                Latitude
+              </label>
+
+              <input
+                type="number"
+                step="any"
+                value={stationForm.latitude}
+                onChange={(e) =>
+                  setStationForm({
+                    ...stationForm,
+                    latitude: e.target.value,
+                  })
+                }
+                placeholder="-7.2575"
+                className="mt-2 w-full rounded-lg border border-border-soft px-4 py-3 outline-none focus:border-primary-green"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-semibold">
+                Longitude
+              </label>
+
+              <input
+                type="number"
+                step="any"
+                value={stationForm.longitude}
+                onChange={(e) =>
+                  setStationForm({
+                    ...stationForm,
+                    longitude: e.target.value,
+                  })
+                }
+                placeholder="112.7521"
+                className="mt-2 w-full rounded-lg border border-border-soft px-4 py-3 outline-none focus:border-primary-green"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="text-sm font-semibold">
+                Charging Slot Amount
+              </label>
+
+              <p className="mt-1 text-sm text-text-secondary">
+                Set how many charging slots should be created for each charger type.
+              </p>
+
+              <div className="mt-4 grid gap-4 md:grid-cols-3">
+                <div>
+                  <label className="text-sm font-medium">
+                    Normal
+                  </label>
+
+                  <input
+                    type="number"
+                    min="0"
+                    value={stationForm.normalAmount}
+                    onChange={(e) =>
+                      setStationForm({
+                        ...stationForm,
+                        normalAmount: e.target.value,
+                      })
+                    }
+                    placeholder="0"
+                    className="mt-2 w-full rounded-lg border border-border-soft px-4 py-3 outline-none focus:border-primary-green"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">
+                    Fast
+                  </label>
+
+                  <input
+                    type="number"
+                    min="0"
+                    value={stationForm.fastAmount}
+                    onChange={(e) =>
+                      setStationForm({
+                        ...stationForm,
+                        fastAmount: e.target.value,
+                      })
+                    }
+                    placeholder="0"
+                    className="mt-2 w-full rounded-lg border border-border-soft px-4 py-3 outline-none focus:border-primary-green"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">
+                    Ultra
+                  </label>
+
+                  <input
+                    type="number"
+                    min="0"
+                    value={stationForm.ultraAmount}
+                    onChange={(e) =>
+                      setStationForm({
+                        ...stationForm,
+                        ultraAmount: e.target.value,
+                      })
+                    }
+                    placeholder="0"
+                    className="mt-2 w-full rounded-lg border border-border-soft px-4 py-3 outline-none focus:border-primary-green"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => setIsAddStationOpen(false)}
+              className="rounded-lg border border-border-soft px-5 py-3 font-semibold transition hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              onClick={handleCreateStation}
+              className="rounded-lg bg-primary-green px-5 py-3 font-semibold text-white transition hover:opacity-90"
+            >
+              Create Station
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
 
     <Footer />
   </main>

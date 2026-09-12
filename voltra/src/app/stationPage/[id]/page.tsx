@@ -18,9 +18,7 @@ type Station = {
   address: string;
   latitude: number;
   longitude: number;
-  description?: string;
   status: string;
-  imageUrl?: string | null;
   slots: ChargingSlot[];
 };
 
@@ -175,15 +173,15 @@ export default async function StationDetailPage({
                 {/* LEFT - Station Information */}
                 <div>
                     <h1 className="text-5xl font-bold">
-                    {station.location}
+                        {station.name}
                     </h1>
 
                     <p className="mt-2 text-xl">
-                    {station.area}
+                        {station.location}
                     </p>
 
                     <p className="mt-2 text-text-secondary">
-                    {station.address}
+                        {station.address}
                     </p>
 
                     <div className="mt-6">

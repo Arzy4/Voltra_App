@@ -84,7 +84,7 @@ export default function StationCard({ station, displayStatus, onViewMap }: Stati
       <div className="flex flex-col h-full">
         <div className="flex items-start justify-between gap-3 text-white">
           <div className="items-center gap-2">
-            <h3 className="font-bold">{station.location}</h3>
+            <h3>{station.name}</h3>
             <p className="text-sm">{station.area}</p>
           </div>
 

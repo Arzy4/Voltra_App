@@ -4,7 +4,6 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
 import L from "leaflet";
 import { useEffect } from "react";
-import { ChargingStationsData } from "../data/chargingStationsData";
 
 const markerIcon = L.icon({
       iconUrl: "/leaflet/marker-icon.png",
@@ -15,8 +14,18 @@ const markerIcon = L.icon({
       shadowSize: [41, 41],
     });
 
+type Station = {
+  id: number;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  status: string;
+};
+
 type StationMapProps = {
   selectedStationId: number | null;
+  stations: Station[];
 };
 
 function MapController({
@@ -38,11 +47,12 @@ function MapController({
 }
 
 export default function StationMap({
-  selectedStationId
+  selectedStationId,
+  stations,
 }: StationMapProps) {
   const surabayaCenter: LatLngExpression = [-7.2575, 112.7521];
 
-  const selectedStation = ChargingStationsData.find(
+  const selectedStation = stations.find(
     (station) => station.id === selectedStationId
   );
 
