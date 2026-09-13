@@ -85,7 +85,6 @@ export default function StationCard({ station, displayStatus, onViewMap }: Stati
         <div className="flex items-start justify-between gap-3 text-white">
           <div className="items-center gap-2">
             <h3>{station.name}</h3>
-            <p className="text-sm">{station.area}</p>
           </div>
 
           <span
@@ -95,6 +94,11 @@ export default function StationCard({ station, displayStatus, onViewMap }: Stati
           >
             {displayStatus}
           </span>
+        </div>
+        <div>
+          <p className="whitespace-nowrap text-sm mt-2 text-white">
+            {station.location}, {station.area}
+          </p>
         </div>
 
         <hr className="my-3 border-green-300"></hr>
