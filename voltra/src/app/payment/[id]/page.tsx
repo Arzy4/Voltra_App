@@ -46,6 +46,26 @@ export default function PaymentPage() {
     const [city, setCity] = useState("");
     const [postalCode, setPostalCode] = useState("");
 
+    const [modal, setModal] = useState({
+        open: false,
+        type: "success" as "success" | "error",
+        title: "",
+        message: "",
+    });
+  
+    const showModal = (
+      type: "success" | "error",
+      title: string,
+      message: string
+    ) => {
+    setModal({
+      open: true,
+          type,
+          title,
+          message,
+      });
+    };
+
     useEffect(() => {
       const fetchBooking = async () => {
         try {
@@ -96,7 +116,11 @@ export default function PaymentPage() {
         if (!booking) return;
 
         if (!fullName || !address || !city || !postalCode) {
-          alert("Please complete your billing address.");
+          showModal(
+            "error",
+            "Incomplete Address",
+            "Please complete your billing address."
+          );
           return;
         }
 
@@ -104,7 +128,11 @@ export default function PaymentPage() {
           paymentMethod === "CARD" &&
           (!cardholderName || !cardNumber || !expiryDate || !cvv)
         ) {
-          alert("Please complete your card details.");
+          showModal(
+            "error",
+            "Incomplete Card Details",
+            "Please complete your card details."
+          );
           return;
         }
 
@@ -150,16 +178,18 @@ export default function PaymentPage() {
           );
         }
 
-        alert("Payment successful! Your booking has been confirmed.");
-
-        router.push(`/bookingsPage/${booking.id}`);
+          showModal(
+          "success",
+          "Payment Confirmed!",
+          "Your booking has been confirmed."
+        );
       } catch (error) {
-        console.error("Payment failed:", error);
-
-        alert(
+        showModal(
+          "error",
+          "Payment Failed",
           error instanceof Error
             ? error.message
-            : "Payment failed."
+            : "We couldn't process your payment. Please try again."
         );
       }
     }
@@ -438,6 +468,55 @@ return (
         </section>
       </div>
     </div>
+
+    {modal.open && (
+      <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 px-4">
+        <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+
+          <div
+            className={`mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full ${
+              modal.type === "success"
+                ? "bg-green-100 text-green-600"
+                : "bg-red-100 text-red-600"
+            }`}
+          >
+            <span className="text-2xl">
+              {modal.type === "success" ? "✓" : "✕"}
+            </span>
+          </div>
+
+          <h2 className="text-center text-2xl font-bold text-gray-900">
+            {modal.title}
+          </h2>
+
+          <p className="mt-3 text-center text-gray-600">
+            {modal.message}
+          </p>
+
+          <button
+            type="button"
+            onClick={() => {
+              setModal((prev) => ({
+                ...prev,
+                open: false,
+              }));
+
+              if (modal.type === "success") {
+                router.push(`/bookingsPage/${booking.id}`);
+              }
+            }}
+            className={`mt-7 w-full rounded-xl px-4 py-3 font-semibold text-white duration-300 ${
+              modal.type === "success"
+                ? "bg-primary-green hover:opacity-90"
+                : "bg-red-500 hover:bg-red-600"
+            }`}
+          >
+            {modal.type === "success" ? "View Booking Detail" : "Try Again"}
+          </button>
+
+        </div>
+      </div>
+    )}
   </main>
 )
 }

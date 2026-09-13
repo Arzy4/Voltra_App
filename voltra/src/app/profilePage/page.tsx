@@ -156,6 +156,26 @@ export default function ProfilePage() {
     status: "AVAILABLE" as "AVAILABLE" | "OCCUPIED" | "MAINTENANCE",
   });
 
+  const [modal, setModal] = useState({
+        open: false,
+        type: "success" as "success" | "error",
+        title: "",
+        message: "",
+    });
+  
+    const showModal = (
+        type: "success" | "error",
+        title: string,
+        message: string
+    ) => {
+    setModal({
+        open: true,
+            type,
+            title,
+            message,
+        });
+    };
+
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
@@ -250,10 +270,12 @@ export default function ProfilePage() {
   }, [activeSection]);
 
   function handleLogout() {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    alert("Logout successful!");
-    router.push("/");
+    setModal({
+      open: true,
+      type: "error",
+      title: "Log Out?",
+      message: "Are you sure you want to log out of your VOLTRA account?",
+    });
   }
 
   function handleCancelUpdate() {
@@ -2413,6 +2435,90 @@ export default function ProfilePage() {
               {isDeletingSlot ? "Deleting..." : "Delete Slot"}
             </button>
           </div>
+        </div>
+      </div>
+    )}
+
+    {modal.open && (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4">
+        <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+
+          <div
+            className={`mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full ${
+              modal.type === "success"
+                ? "bg-green-100 text-green-600"
+                : "bg-red-100 text-red-600"
+            }`}
+          >
+            <span className="text-2xl">
+              {modal.type === "success" ? "✓" : "!"}
+            </span>
+          </div>
+
+          <h2 className="text-center text-2xl font-bold text-gray-900">
+            {modal.type === "success"
+              ? "See You Again!"
+              : "Log Out?"}
+          </h2>
+
+          <p className="mt-3 text-center text-gray-600">
+            {modal.type === "success"
+              ? "You have been logged out of VOLTRA successfully."
+              : "Are you sure you want to log out of your VOLTRA account?"}
+          </p>
+
+          {modal.type === "success" ? (
+            <button
+              type="button"
+              onClick={() => {
+                setModal((prev) => ({
+                  ...prev,
+                  open: false,
+                }));
+
+                router.push("/");
+              }}
+              className="mt-7 w-full rounded-xl bg-primary-green px-4 py-3 font-semibold text-white duration-300 hover:opacity-90"
+            >
+              Back to Home
+            </button>
+          ) : (
+            <div className="mt-7 flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setModal((prev) => ({
+                    ...prev,
+                    open: false,
+                  }));
+                }}
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 font-semibold text-gray-700 duration-300 hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  localStorage.removeItem("accessToken");
+                  localStorage.removeItem("refreshToken");
+                  localStorage.removeItem("currentUser");
+
+                  setCurrentUser(null);
+
+                  setModal({
+                    open: true,
+                    type: "success",
+                    title: "See You Again!",
+                    message: "You have been logged out of VOLTRA successfully.",
+                  });
+                }}
+                className="w-full rounded-xl bg-red-500 px-4 py-3 font-semibold text-white duration-300 hover:bg-red-600"
+              >
+                Log Out
+              </button>
+            </div>
+          )}
         </div>
       </div>
     )}

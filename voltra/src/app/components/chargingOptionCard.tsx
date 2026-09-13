@@ -347,80 +347,51 @@ export default function ChargingOptionCard({
                   onBack={() => setModalStep("schedule")}
                   onClose={handleCloseModal}
                   onConfirm={async () => {
-                    try {
-                      const bookingData = {
-                        slotId: selectedSlot.id,
-                        startTime: new Date(
-                          `${bookingSchedule.selectedDate}T${bookingSchedule.startTime}:00`
-                        ).toISOString(),
-                        durationMinutes:
-                          bookingSchedule.durationMinutes,
-                      };
+                    const bookingData = {
+                      slotId: selectedSlot.id,
+                      startTime: new Date(
+                        `${bookingSchedule.selectedDate}T${bookingSchedule.startTime}:00`
+                      ).toISOString(),
+                      durationMinutes: bookingSchedule.durationMinutes,
+                    };
 
-                      const apiUrl =
-                        process.env.NEXT_PUBLIC_API_URL;
+                    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+                    const accessToken = localStorage.getItem("accessToken");
 
-                      const accessToken =
-                        localStorage.getItem("accessToken");
+                    if (!apiUrl) {
+                      throw new Error("NEXT_PUBLIC_API_URL is not defined.");
+                    }
 
-                      if (!apiUrl) {
-                        throw new Error(
-                          "NEXT_PUBLIC_API_URL is not defined."
-                        );
-                      }
+                    if (!accessToken) {
+                      throw new Error("Please login first.");
+                    }
 
-                      if (!accessToken) {
-                        alert("Please login first.");
-                        return;
-                      }
+                    const response = await fetch(`${apiUrl}/bookings`, {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${accessToken}`,
+                      },
+                      body: JSON.stringify(bookingData),
+                    });
 
-                      const response = await fetch(
-                        `${apiUrl}/bookings`,
-                        {
-                          method: "POST",
-                          headers: {
-                            "Content-Type":
-                              "application/json",
-                            Authorization: `Bearer ${accessToken}`,
-                          },
-                          body: JSON.stringify(bookingData),
-                        }
-                      );
+                    const result = await response.json();
 
-                      const result = await response.json();
 
-                      if (!response.ok) {
-                        alert(
-                          Array.isArray(result.message)
-                            ? result.message.join(", ")
-                            : result.message ||
-                                "Failed to create booking."
-                        );
-
-                        return;
-                      }
-
-                      const newBooking = result.data;
-
-                      alert(
-                        "Booking created successfully! You will now be directed to the payment page."
-                      );
-
-                      router.push(
-                        `/payment/${newBooking.id}`
-                      );
-                    } catch (error) {
-                      console.error(
-                        "Failed to create booking:",
-                        error
-                      );
-
-                      alert(
-                        error instanceof Error
-                          ? error.message
-                          : "Failed to create booking."
+                    if (!response.ok) {
+                      throw new Error(
+                        Array.isArray(result.message)
+                          ? result.message.join(", ")
+                          : result.message || "Failed to create booking."
                       );
                     }
+
+                    const newBooking = result.data;
+
+                    localStorage.setItem(
+                      "latestBookingId",
+                      String(newBooking.id)
+                    );
                   }}
                 />
               )}

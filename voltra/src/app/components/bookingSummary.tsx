@@ -1,5 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 type BookingSummaryProps = {
   slotCode: string;
   type: string;
@@ -10,7 +13,7 @@ type BookingSummaryProps = {
   durationMinutes: number;
   onBack: () => void;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: () => Promise<void>;
 };
 
 export default function BookingSummary({
@@ -25,6 +28,8 @@ export default function BookingSummary({
   onClose,
   onConfirm,
 }: BookingSummaryProps) {
+  const router =useRouter();
+
   const durationHours = durationMinutes / 60;
 
   const estimatedKwh = power * durationHours;
@@ -53,6 +58,46 @@ export default function BookingSummary({
       minute: "2-digit",
       hour12: false,
     });
+  };
+
+  const [modal, setModal] = useState({
+      open: false,
+      type: "success" as "success" | "error",
+      title: "",
+      message: "",
+  });
+
+  const showModal = (
+      type: "success" | "error",
+      title: string,
+      message: string
+  ) => {
+  setModal({
+      open: true,
+          type,
+          title,
+          message,
+      });
+  };
+
+  const handleConfirmBooking = async () => {
+    try {
+      await onConfirm();
+
+      showModal(
+        "success",
+        "Booking Confirmed!",
+        "Your charging slot has been booked successfully."
+      );
+    } catch (error) {
+      showModal(
+        "error",
+        "Booking Failed",
+        error instanceof Error
+          ? error.message
+          : "We couldn't create your booking. Please try again."
+      );
+    }
   };
 
   return (
@@ -234,11 +279,66 @@ export default function BookingSummary({
       {/* CONFIRM */}
       <button
         type="button"
-        onClick={onConfirm}
+        onClick={handleConfirmBooking}
         className="mt-6 w-full rounded-xl bg-primary-green px-6 py-4 font-semibold text-white duration-300 hover:opacity-90"
       >
         Confirm Booking
       </button>
+
+      {/* MODAL POP UP */}
+      {/* Before and After Confirmation Pop Up */}
+      {modal.open && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+
+            <div
+              className={`mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full ${
+                modal.type === "success"
+                  ? "bg-green-100 text-green-600"
+                  : "bg-red-100 text-red-600"
+              }`}
+            >
+              <span className="text-2xl">
+                {modal.type === "success" ? "✓" : "✕"}
+              </span>
+            </div>
+
+            <h2 className="text-center text-2xl font-bold text-gray-900">
+              {modal.title}
+            </h2>
+
+            <p className="mt-3 text-center text-gray-600">
+              {modal.message}
+            </p>
+
+            <button
+              type="button"
+              onClick={() => {
+                setModal((prev) => ({
+                  ...prev,
+                  open: false,
+                }));
+
+                if (modal.type === "success") {
+                  const bookingId = localStorage.getItem("latestBookingId");
+
+                  if (bookingId) {
+                    router.push(`/payment/${bookingId}`);
+                  }
+                }
+              }}
+              className={`mt-7 w-full rounded-xl px-4 py-3 font-semibold text-white duration-300 ${
+                modal.type === "success"
+                  ? "bg-primary-green hover:opacity-90"
+                  : "bg-red-500 hover:bg-red-600"
+              }`}
+            >
+              {modal.type === "success" ? "Proceed To Payment" : "Try Again"}
+            </button>
+
+          </div>
+        </div>
+      )}
     </>
   );
 }
