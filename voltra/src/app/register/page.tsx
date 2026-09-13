@@ -1,5 +1,4 @@
 import Card from "../components/card";
-import Input from "../components/input";
 import Link from "next/link";
 import RegisterForm from "./registerForm";
 
@@ -23,7 +22,7 @@ export default function register() {
 
                 <p className="mt-6 text-center text-sm">
                 Already have an account?{" "}
-                    <Link href="/login" className="font-semibold text-blue-500">
+                    <Link href="/login" className="font-semibold text-blue-400">
                         Login
                     </Link>
                 </p>

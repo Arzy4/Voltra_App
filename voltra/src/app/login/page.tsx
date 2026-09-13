@@ -1,6 +1,4 @@
-import Button from "../components/button";
 import Card from "../components/card";
-import Input from "../components/input";
 import Link from "next/link";
 import LoginForm from "./loginForm";
 
@@ -24,7 +22,7 @@ export default function login() {
 
                 <p className="mt-6 text-center text-sm">
                 Don&apos;t have an account?{" "}
-                    <Link href="/register" className="font-semibold text-blue-500">
+                    <Link href="/register" className="font-semibold text-blue-400">
                         Register
                     </Link>
                 </p>
