@@ -180,7 +180,7 @@ export default function PaymentPage() {
 
           showModal(
           "success",
-          "Payment Confirmed!",
+          "Payment Success!",
           "Your booking has been confirmed."
         );
       } catch (error) {

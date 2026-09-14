@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "../components/button";
 import Input from "../components/input";
+import { createPortal } from "react-dom";
 
 export default function LoginForm() {
     const router = useRouter();
@@ -116,50 +117,53 @@ export default function LoginForm() {
             <Button text="Login" />
             
             {modal.open && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4">
-                    <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
-                        <div
-                        className={`mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full ${
-                            modal.type === "success"
-                            ? "bg-green-100 text-green-600"
-                            : "bg-red-100 text-red-600"
-                        }`}
-                        >
-                        <span className="text-2xl">
-                            {modal.type === "success" ? "✓" : "✕"}
-                        </span>
+                createPortal(
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4">
+                        <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+                            <div
+                            className={`mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full ${
+                                modal.type === "success"
+                                ? "bg-green-100 text-green-600"
+                                : "bg-red-100 text-red-600"
+                            }`}
+                            >
+                            <span className="text-2xl">
+                                {modal.type === "success" ? "✓" : "✕"}
+                            </span>
+                            </div>
+
+                            <h2 className="text-center text-2xl font-bold text-gray-900">
+                            {modal.title}
+                            </h2>
+
+                            <p className="mt-3 text-center text-gray-600">
+                            {modal.message}
+                            </p>
+
+                            <button
+                            type="button"
+                            onClick={() => {
+                                setModal((prev) => ({
+                                ...prev,
+                                open: false,
+                                }));
+
+                                if (modal.type === "success") {
+                                router.push("/stationPage");
+                                }
+                            }}
+                            className={`mt-7 w-full rounded-xl px-4 py-3 font-semibold text-white duration-300 ${
+                                modal.type === "success"
+                                ? "bg-green-500 hover:bg-green-600"
+                                : "bg-red-500 hover:bg-red-600"
+                            }`}
+                            >
+                            {modal.type === "success" ? "Continue" : "Try Again"}
+                            </button>
                         </div>
-
-                        <h2 className="text-center text-2xl font-bold text-gray-900">
-                        {modal.title}
-                        </h2>
-
-                        <p className="mt-3 text-center text-gray-600">
-                        {modal.message}
-                        </p>
-
-                        <button
-                        type="button"
-                        onClick={() => {
-                            setModal((prev) => ({
-                            ...prev,
-                            open: false,
-                            }));
-
-                            if (modal.type === "success") {
-                            router.push("/stationPage");
-                            }
-                        }}
-                        className={`mt-7 w-full rounded-xl px-4 py-3 font-semibold text-white duration-300 ${
-                            modal.type === "success"
-                            ? "bg-green-500 hover:bg-green-600"
-                            : "bg-red-500 hover:bg-red-600"
-                        }`}
-                        >
-                        {modal.type === "success" ? "Continue" : "Try Again"}
-                        </button>
-                    </div>
-                </div>
+                    </div>,
+                    document.body
+                )
             )}
 
         </form>
