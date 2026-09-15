@@ -1,4 +1,5 @@
 import ChargingOptionCard from "../../components/chargingOptionCard";
+import Link from "next/link";
 
 type ChargingSlot = {
   id: number;
@@ -172,16 +173,20 @@ export default async function StationDetailPage({
 
                 {/* LEFT - Station Information */}
                 <div>
-                    <h1 className="text-5xl font-bold">
+                     <Link
+                        href="/stationPage"
+                        className="mb-6 inline-flex items-center gap-2 font-semibold text-primary-green transition hover:opacity-70"
+                    >
+                        <span>←</span>
+                        Back to Stations
+                    </Link>
+
+                    <h1 className="text-4xl font-bold">
                         {station.name}
                     </h1>
 
-                    <p className="mt-2 text-xl">
-                        {station.location}
-                    </p>
-
-                    <p className="mt-2 text-text-secondary">
-                        {station.address}
+                    <p className="mt-2 text-lg">
+                        {station.location}, {station.address}
                     </p>
 
                     <div className="mt-6">
@@ -197,7 +202,7 @@ export default async function StationDetailPage({
 
                 {/* RIGHT - Charging Availability */}
                 <div>
-                    <h2 className="mb-6 text-3xl font-bold">
+                    <h2 className="pt-4 pb-2 text-3xl font-bold">
                     Charging Availability
                     </h2>
 

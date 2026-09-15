@@ -104,7 +104,7 @@ export default function About() {
                         <p className="text-lg">Sign in, find available EV Charging Stations, and reserve your next charge</p>
                     </div>
                     
-                    <Link href="/login">
+                    <Link href="/auth">
                         <Button text="Sign in and find nearest charging stations"/>
                     </Link>
                 </div>

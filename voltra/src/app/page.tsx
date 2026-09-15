@@ -18,7 +18,7 @@ export default function Home() {
           <h1 className="text-6xl max-w-[50%] font-bold">Charge Your EV Smarter with Voltra</h1>
           <p className="text-2xl max-w-[60%]">Find nearby charging stations, check real-time availability, and reserve your charging slot in seconds.</p>
 
-          <Link href="/login"><Button text="Sign in and find nearest charging stations"/></Link>
+          <Link href="/auth"><Button text="Sign in and find nearest charging stations"/></Link>
         </div>
       </section>
 

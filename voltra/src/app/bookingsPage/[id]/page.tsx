@@ -123,12 +123,31 @@ export default function BookingDetailPage() {
     (endTime.getTime() - startTime.getTime()) /
     (1000 * 60);
 
+  const isActiveBooking =
+    !isExpired &&
+    ["PENDING", "CONFIRMED", "ONGOING"].includes(booking.status);
+
+  const backToBookingsHref = isActiveBooking
+    ? "/bookingsPage/activePage"
+    : "/bookingsPage/historyPage";
+
   return (
     <main className="min-h-screen bg-background pb-16">
     <>
       {/* HEADER */}
       <section className="rounded-b-[24px] bg-primary-green px-6 py-6 text-white">
         <div className="mx-auto max-w-3xl flex flex-col justify-items-center">
+
+          {/* BACK TO BOOKINGS */}
+          <Link
+            href={backToBookingsHref}
+            className="my-4 inline-flex w-fit cursor-pointer items-center gap-2 text-sm font-semibold text-white transition hover:opacity-70"
+          >
+            <span>←</span>
+            Back to Bookings
+          </Link>
+
+          {/* BOOKING HEADER */}
           <div className="mt-2 flex items-center justify-between gap-4">
             <div>
               <p className="text-sm opacity-80">
@@ -152,6 +171,7 @@ export default function BookingDetailPage() {
         </div>
       </section>
 
+      {/* BOOKING DETAILS */}
       <section className="mx-auto max-w-2xl space-y-5 px-6 py-8">
         {/* STATION */}
         <div className="rounded-2xl bg-white p-6 shadow-sm">

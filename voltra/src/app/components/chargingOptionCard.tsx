@@ -4,7 +4,6 @@ import { useState } from "react";
 import ChargingSlotCard from "./chargingSlotCard";
 import BookingSummary from "./bookingSummary";
 import type { ChargingSlot } from "../types/station";
-import { useRouter } from "next/navigation";
 
 type ChargingOptionCardProps = {
   stationId: number;
@@ -30,7 +29,6 @@ export default function ChargingOptionCard({
   available,
   pricePerKwh,
 }: ChargingOptionCardProps) {
-  const router = useRouter();
 
   const [isOpen, setIsOpen] = useState(false);
 

@@ -12,6 +12,8 @@ export default function LoginForm() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
+    const [redirectPath, setRedirectPath] = useState("/stationPage");
+
     const [modal, setModal] = useState({
         open: false,
         type: "success" as "success" | "error",
@@ -78,10 +80,16 @@ export default function LoginForm() {
             localStorage.setItem("refreshToken", result.refreshToken);
 
             if (result.user) {
-            localStorage.setItem(
-                "currentUser",
+                localStorage.setItem(
+                    "currentUser",
                     JSON.stringify(result.user)
                 );
+
+                if (result.user.role === "ADMIN") {
+                    setRedirectPath("/admin");
+                } else {
+                    setRedirectPath("/stationPage");
+                }
             }
 
             showModal(
@@ -149,7 +157,7 @@ export default function LoginForm() {
                                 }));
 
                                 if (modal.type === "success") {
-                                router.push("/stationPage");
+                                    router.push(redirectPath);
                                 }
                             }}
                             className={`mt-7 w-full rounded-xl px-4 py-3 font-semibold text-white duration-300 ${

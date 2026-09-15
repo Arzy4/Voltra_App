@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { apiFetch } from "../../lib/apiFetch";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type BookingDetail = {
   id: number;
@@ -201,6 +202,14 @@ return (
 
         {/* LEFT SIDE - PAYMENT SUMMARY */}
         <section className="h-full p-8 md:p-12">
+          <Link
+            href="/bookingsPage/activePage"
+            className="mb-4 inline-flex cursor-pointer items-center gap-2 font-semibold text-primary-green transition hover:opacity-70"
+          >
+            <span>←</span>
+            Back to Bookings
+          </Link>
+
           <h1 className="text-4xl font-bold text-primary-green">
             Payment
           </h1>
@@ -213,7 +222,7 @@ return (
             Complete your payment to confirm your booking.
           </p>
 
-          <div className="my-8 border-t border-border-soft" />
+          <div className="my-4 border-t border-border-soft" />
 
           <div className="space-y-6">
             <div className="grid grid-cols-[140px_1fr] gap-4">
@@ -259,7 +268,7 @@ return (
             </div>
           </div>
 
-          <div className="my-8 border-t border-border-soft" />
+          <div className="my-4 border-t border-border-soft" />
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
