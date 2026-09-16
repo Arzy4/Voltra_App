@@ -5,6 +5,7 @@ import { apiFetch } from "../../lib/apiFetch";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Footer from "@/app/components/footer";
+import { useRouter } from "next/navigation";
 
 type BookingDetail = {
   id: number;
@@ -44,8 +45,27 @@ type BookingDetail = {
   } | null;
 };
 
+type Station = {
+  id: number;
+  name: string;
+  location: string;
+  area: string;
+  address: string;
+
+   slots: {
+    id: number;
+    slotCode: string;
+    chargerType: "NORMAL" | "FAST" | "ULTRA";
+    powerKw: number;
+    pricePerKwh: number;
+    status: "AVAILABLE" | "OCCUPIED" | "MAINTENANCE";
+  }[];
+};
+
 
 export default function BookingDetailPage() {
+  const router = useRouter();
+  
   const params = useParams();
 
   const rawBookingId = params.id;
@@ -58,6 +78,48 @@ export default function BookingDetailPage() {
     useState<BookingDetail | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
+
+  const [showUpdateModal, setShowUpdateModal] =
+    useState(false);
+
+  const [showSaveConfirmation, setShowSaveConfirmation] =
+    useState(false);
+
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [stations, setStations] = useState<Station[]>([]);
+
+  const [selectedStationId, setSelectedStationId] =
+    useState<number>(0);
+
+  const [selectedSlotId, setSelectedSlotId] =
+    useState<number>(0);
+
+  const [editStartTime, setEditStartTime] =
+    useState("");
+
+  const [editDuration, setEditDuration] =
+    useState<number>(60);
+
+  const [modal, setModal] = useState({
+      open: false,
+      type: "success" as "success" | "error",
+      title: "",
+      message: "",
+  });
+
+  const showModal = (
+      type: "success" | "error",
+      title: string,
+      message: string
+  ) => {
+  setModal({
+      open: true,
+          type,
+          title,
+          message,
+      });
+  };
 
   useEffect(() => {
     const fetchBooking = async () => {
@@ -95,6 +157,107 @@ export default function BookingDetailPage() {
     fetchBooking();
   }, [bookingId]);
 
+  useEffect(() => {
+    const fetchStations = async () => {
+      try {
+        const response = await apiFetch("/stations");
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            result.message || "Failed to retrieve stations."
+          );
+        }
+
+        setStations(result.data ?? []);
+      } catch (error) {
+        console.error("Failed to retrieve stations:", error);
+        setStations([]);
+      }
+    };
+
+    fetchStations();
+  }, []);
+
+  const handleSaveChanges = async () => {
+    if (
+      !booking ||
+      !selectedSlotId ||
+      !editStartTime
+    ) {
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+
+      const response = await apiFetch(
+        `/bookings/${booking.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            slotId: selectedSlotId,
+            startTime: new Date(editStartTime).toISOString(),
+            durationMinutes: editDuration,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message || "Failed to update booking."
+        );
+      }
+
+      if (
+        result.paymentAdjustment?.type === "ADDITIONAL_PAYMENT" &&
+        result.paymentAdjustment?.adjustmentId
+      ) {
+        setShowSaveConfirmation(false);
+        setShowUpdateModal(false);
+
+        router.push(
+          `/payment/adjustment/${result.paymentAdjustment.adjustmentId}`
+        );
+
+        return;
+      }
+
+      setShowSaveConfirmation(false);
+      setShowUpdateModal(false);
+
+      showModal(
+        "success",
+        "Booking Updated",
+        `Booking ${booking.bookingCode} updated successfully`
+      );
+
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to update booking.";
+
+      // Close confirmation modal
+      setShowSaveConfirmation(false);
+
+      // Show result modal
+      showModal(
+        "error",
+        "Update Failed",
+        message
+      );
+
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center">
@@ -131,12 +294,52 @@ export default function BookingDetailPage() {
     ? "/bookingsPage/activePage"
     : "/bookingsPage/historyPage";
 
+  const selectedStation = stations.find(
+    (station) => station.id === selectedStationId
+  );
+
+  const availableSlots =
+    selectedStation?.slots.filter(
+      (slot) =>
+        slot.status === "AVAILABLE" ||
+        slot.id === booking.slot.id
+    ) ?? [];
+
+  const selectedSlot = availableSlots.find(
+    (slot) => slot.id === selectedSlotId
+  );
+
+  const updatedEstimatedKwh = selectedSlot
+    ? selectedSlot.powerKw * (editDuration / 60)
+    : 0;
+
+  const updatedEstimatedCost = selectedSlot
+    ? updatedEstimatedKwh * Number(selectedSlot.pricePerKwh)
+    : 0;
+
+  const paidAmount =
+  booking.payment?.status === "PAID"
+    ? Number(booking.payment.amount)
+    : 0;
+
+  const priceDifference =
+    updatedEstimatedCost - paidAmount;
+
+  const paymentAdjustment =
+    booking.payment?.status !== "PAID"
+      ? "UNPAID"
+      : priceDifference > 0
+        ? "ADDITIONAL_PAYMENT"
+        : priceDifference < 0
+          ? "REFUND"
+          : "NO_CHANGE";
+
   return (
     <main className="min-h-screen bg-background pb-16">
     <>
       {/* HEADER */}
       <section className="rounded-b-[24px] bg-primary-green px-6 py-6 text-white">
-        <div className="mx-auto max-w-3xl flex flex-col justify-items-center">
+        <div className="mx-auto max-w-3xl flex justify-between">
 
           {/* BACK TO BOOKINGS */}
           <Link
@@ -147,27 +350,57 @@ export default function BookingDetailPage() {
             Back to Bookings
           </Link>
 
-          {/* BOOKING HEADER */}
-          <div className="mt-2 flex items-center justify-between gap-4">
-            <div>
-              <p className="text-sm opacity-80">
-                Booking Details
-              </p>
+          {/* UPDATE BOOKING */}
+          {isActiveBooking && booking.status !== "ONGOING" && (
+            <button
+              type="button"
+              onClick={() => {
+                const currentStartTime = new Date(booking.startTime);
 
-              <h1 className="mt-1 text-2xl font-bold">
-                {booking.bookingCode}
-              </h1>
-            </div>
+                const localStartTime = new Date(
+                  currentStartTime.getTime() -
+                    currentStartTime.getTimezoneOffset() * 60 * 1000
+                )
+                  .toISOString()
+                  .slice(0, 16);
 
-            <span className="rounded-full bg-white px-4 py-1 text-lg font-semibold text-primary-green mt-8">
-              {booking.status}
-            </span>
+                const currentDuration =
+                  (new Date(booking.endTime).getTime() -
+                    currentStartTime.getTime()) /
+                  (1000 * 60);
+
+                setSelectedStationId(booking.slot.station.id);
+                setSelectedSlotId(booking.slot.id);
+                setEditStartTime(localStartTime);
+                setEditDuration(currentDuration);
+                setShowUpdateModal(true);
+              }}
+              className="cursor-pointer rounded-xl bg-white px-4 py-2 text-sm font-semibold text-primary-green transition hover:opacity-90 mt-4"
+            >
+              Update Booking
+            </button>
+          )}
+        </div>
+
+        {/* BOOKING HEADER */}
+        <div className="mt-8 flex items-center justify-center gap-[280px]">
+          <div>
+            <p className="text-sm opacity-80">
+              Booking Details
+            </p>
+
+            <h1 className="mt-1 text-2xl font-bold">
+              {booking.bookingCode}
+            </h1>
+
+            <p className="mt-4 text-sm opacity-90">
+              Your charging reservation details and payment information.
+            </p>
           </div>
 
-          <p className="mt-4 text-sm opacity-90">
-            Your charging reservation details and
-            payment information.
-          </p>
+          <span className="rounded-full bg-white px-4 py-1 text-lg font-semibold text-primary-green">
+            {booking.status}
+          </span>
         </div>
       </section>
 
@@ -372,6 +605,414 @@ export default function BookingDetailPage() {
           ) : null}
         </div>
       </section>
+
+      {/* UPDATE BOOKING MODAL */}
+      {showUpdateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 mb-15">
+          <div className="flex h-[600px] w-full max-w-lg flex-col rounded-2xl bg-white p-6 shadow-xl">
+            
+            {/* MODAL HEADER */}
+            <div className="shrink-0">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Update Booking
+                  </h2>
+
+                  <p className="mt-1 text-sm text-gray-500">
+                    {booking.bookingCode}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowUpdateModal(false)}
+                  className="cursor-pointer text-2xl text-gray-400 transition hover:text-gray-700"
+                >
+                  ×
+                </button>
+              </div>
+
+              <p className="mt-6 text-sm text-gray-500">
+                Update your charging reservation.
+              </p>
+            </div>
+
+            {/* CURRENT BOOKING */}
+            <div className="hide-scrollbar mt-6 min-h-0 flex-1 space-y-4 overflow-y-auto pr-2">
+
+              {/* STATION */}
+              <div>
+                <label
+                  htmlFor="chargingStation"
+                  className="text-sm font-semibold text-gray-700"
+                >
+                  Charging Station
+                </label>
+
+                <select
+                  id="chargingStation"
+                  value={selectedStationId}
+                  onChange={(e) =>{
+                    setSelectedStationId(Number(e.target.value));
+                    setSelectedSlotId(0);
+                  }}
+                  className="mt-2 w-full cursor-pointer rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary-green"
+                >
+                  {stations.map((station) => (
+                    <option
+                      key={station.id}
+                      value={station.id}
+                    >
+                      {station.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* CHARGING SLOT */}
+              <div>
+                <label
+                  htmlFor="chargingSlot"
+                  className="text-sm font-semibold text-gray-700"
+                >
+                  Charging Slot
+                </label>
+
+                <select
+                  id="chargingSlot"
+                  value={selectedSlotId}
+                  onChange={(e) =>
+                    setSelectedSlotId(Number(e.target.value))
+                  }
+                  className="mt-2 w-full cursor-pointer rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary-green"
+                >
+                  <option value={0} disabled>
+                    Select a charging slot
+                  </option>
+
+                  {availableSlots.map((slot) => (
+                    <option
+                      key={slot.id}
+                      value={slot.id}
+                    >
+                      {slot.slotCode} • {slot.chargerType} •{" "}
+                      {slot.powerKw} kW
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* CURRENT SCHEDULE */}
+              <div>
+                <label
+                  htmlFor="bookingStartTime"
+                  className="text-sm font-semibold text-gray-700"
+                >
+                  Start Date & Time
+                </label>
+
+                <input
+                  id="bookingStartTime"
+                  type="datetime-local"
+                  value={editStartTime}
+                  onChange={(e) => setEditStartTime(e.target.value)}
+                  className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary-green"
+                />
+              </div>
+
+              {/* DURATION */}
+              <div>
+                <label
+                  htmlFor="bookingDuration"
+                  className="text-sm font-semibold text-gray-700"
+                >
+                  Duration
+                </label>
+
+                <select
+                  id="bookingDuration"
+                  value={editDuration}
+                  onChange={(e) =>
+                    setEditDuration(Number(e.target.value))
+                  }
+                  className="mt-2 w-full cursor-pointer rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none focus:border-primary-green"
+                >
+                  <option value={30}>30 minutes</option>
+                  <option value={60}>1 hour</option>
+                  <option value={90}>1 hour 30 minutes</option>
+                  <option value={120}>2 hours</option>
+                  <option value={180}>3 hours</option>
+                </select>
+              </div>
+
+              {/* UPDATED ESTIMATE */}
+              <div className="rounded-xl bg-[#e3fff1] p-4">
+                <p className="text-sm font-semibold text-gray-700">
+                  Updated Estimate
+                </p>
+
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">
+                      Estimated Energy
+                    </span>
+
+                    <span className="text-sm font-semibold text-gray-900">
+                      {updatedEstimatedKwh.toFixed(2)} kWh
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">
+                      Estimated Cost
+                    </span>
+
+                    <span className="font-bold text-primary-green">
+                      Rp{" "}
+                      {updatedEstimatedCost.toLocaleString("id-ID")}
+                    </span>
+                  </div>
+
+                  {booking.payment?.status === "PAID" && (
+                    <>
+                      <div className="my-3 border-t border-green-200" />
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500">
+                          Already Paid
+                        </span>
+
+                        <span className="text-sm font-semibold text-gray-900">
+                          Rp {paidAmount.toLocaleString("id-ID")}
+                        </span>
+                      </div>
+
+                      {paymentAdjustment === "ADDITIONAL_PAYMENT" && (
+                        <div className="mt-2 flex items-center justify-between">
+                          <span className="text-sm font-semibold text-orange-600">
+                            Additional Payment
+                          </span>
+
+                          <span className="font-bold text-orange-600">
+                            Rp {priceDifference.toLocaleString("id-ID")}
+                          </span>
+                        </div>
+                      )}
+
+                      {paymentAdjustment === "REFUND" && (
+                        <div className="mt-2 flex items-center justify-between">
+                          <span className="text-sm font-semibold text-blue-600">
+                            Refund Amount
+                          </span>
+
+                          <span className="font-bold text-blue-600">
+                            Rp {Math.abs(priceDifference).toLocaleString("id-ID")}
+                          </span>
+                        </div>
+                      )}
+
+                      {paymentAdjustment === "NO_CHANGE" && (
+                        <div className="mt-2 flex items-center justify-between">
+                          <span className="text-sm font-semibold text-green-600">
+                            Payment Adjustment
+                          </span>
+
+                          <span className="font-bold text-green-600">
+                            No additional payment
+                          </span>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+
+            </div>
+
+            {/* ACTIONS */}
+            <div className="mt-4 flex shrink-0 justify-end gap-3 border-t border-gray-100 pt-4">
+              <button
+                type="button"
+                onClick={() => setShowUpdateModal(false)}
+                className="cursor-pointer rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowSaveConfirmation(true)}
+                disabled={
+                  !selectedStationId ||
+                  !selectedSlotId ||
+                  !editStartTime
+                }
+                className="cursor-pointer rounded-xl bg-primary-green px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SAVE CONFIRMATION MODAL */}
+      {showSaveConfirmation && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+
+            <h2 className="text-xl font-bold text-gray-900">
+              Confirm Booking Update
+            </h2>
+
+            <p className="mt-2 text-sm leading-6 text-gray-500">
+              Are you sure you want to save these changes?
+            </p>
+
+            {/* PAYMENT ADJUSTMENT SUMMARY */}
+            {booking.payment?.status === "PAID" && (
+              <div className="mt-5 rounded-xl bg-gray-50 p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-500">
+                    Updated Cost
+                  </span>
+
+                  <span className="text-sm font-semibold text-gray-900">
+                    Rp {updatedEstimatedCost.toLocaleString("id-ID")}
+                  </span>
+                </div>
+
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="text-sm text-gray-500">
+                    Already Paid
+                  </span>
+
+                  <span className="text-sm font-semibold text-gray-900">
+                    Rp {paidAmount.toLocaleString("id-ID")}
+                  </span>
+                </div>
+
+                {paymentAdjustment === "ADDITIONAL_PAYMENT" && (
+                  <div className="mt-3 border-t border-gray-200 pt-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-orange-600">
+                        Additional Payment
+                      </span>
+
+                      <span className="font-bold text-orange-600">
+                        Rp {priceDifference.toLocaleString("id-ID")}
+                      </span>
+                    </div>
+
+                    <p className="mt-2 text-xs leading-5 text-gray-500">
+                      You will need to complete the additional payment
+                      before the updated booking is confirmed.
+                    </p>
+                  </div>
+                )}
+
+                {paymentAdjustment === "REFUND" && (
+                  <div className="mt-3 border-t border-gray-200 pt-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-blue-600">
+                        Refund Amount
+                      </span>
+
+                      <span className="font-bold text-blue-600">
+                        Rp {Math.abs(priceDifference).toLocaleString("id-ID")}
+                      </span>
+                    </div>
+
+                    <p className="mt-2 text-xs leading-5 text-gray-500">
+                      The price difference will be refunded after
+                      the booking update is completed.
+                    </p>
+                  </div>
+                )}
+
+                {paymentAdjustment === "NO_CHANGE" && (
+                  <div className="mt-3 border-t border-gray-200 pt-3">
+                    <p className="text-sm font-semibold text-green-600">
+                      No additional payment or refund is required.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowSaveConfirmation(false)}
+                disabled={isSaving}
+                className="cursor-pointer rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+              >
+                Go Back
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSaveChanges}
+                disabled={isSaving}
+                className="cursor-pointer rounded-xl bg-primary-green px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
+              >
+                Yes, Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AFTER CONFIRMATION MODAL */}
+      {modal.open && (
+      <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 px-4">
+        <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+
+          <div
+            className={`mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full ${
+              modal.type === "success"
+                ? "bg-green-100 text-green-600"
+                : "bg-red-100 text-red-600"
+            }`}
+          >
+            <span className="text-2xl">
+              {modal.type === "success" ? "✓" : "✕"}
+            </span>
+          </div>
+
+          <h2 className="text-center text-2xl font-bold text-gray-900">
+            {modal.title}
+          </h2>
+
+          <p className="mt-3 text-center text-gray-600">
+            {modal.message}
+          </p>
+
+          <button
+            type="button"
+            onClick={() => {
+              setModal((prev) => ({
+                ...prev,
+                open: false,
+              }));
+
+              if (modal.type === "success") {
+                window.location.reload();
+              }
+            }}
+            className={`mt-7 w-full cursor-pointer rounded-xl px-4 py-3 font-semibold text-white duration-300 ${
+              modal.type === "success"
+                ? "bg-primary-green hover:opacity-90"
+                : "bg-red-500 hover:bg-red-600"
+            }`}
+          >
+            {modal.type === "success" ? "Done" : "Try Again"}
+          </button>
+
+        </div>
+      </div>
+    )}
       
       <Footer />
       </>
