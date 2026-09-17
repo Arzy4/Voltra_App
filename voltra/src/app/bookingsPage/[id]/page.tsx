@@ -14,6 +14,8 @@ type BookingDetail = {
   endTime: string;
   estimatedKwh: string;
   estimatedCost: string;
+  netPaidAmount?: number;
+
   status:
     | "PENDING"
     | "CONFIRMED"
@@ -317,13 +319,11 @@ export default function BookingDetailPage() {
     ? updatedEstimatedKwh * Number(selectedSlot.pricePerKwh)
     : 0;
 
-  const paidAmount =
-  booking.payment?.status === "PAID"
-    ? Number(booking.payment.amount)
+  const paidAmount = booking.payment?.status === "PAID"
+    ? Number(booking.netPaidAmount ?? booking.payment.amount)
     : 0;
 
-  const priceDifference =
-    updatedEstimatedCost - paidAmount;
+  const priceDifference = updatedEstimatedCost - paidAmount;
 
   const paymentAdjustment =
     booking.payment?.status !== "PAID"
@@ -383,7 +383,7 @@ export default function BookingDetailPage() {
         </div>
 
         {/* BOOKING HEADER */}
-        <div className="mt-8 flex items-center justify-center gap-[280px]">
+        <div className="mt-8 flex items-center justify-center gap-[265px]">
           <div>
             <p className="text-sm opacity-80">
               Booking Details

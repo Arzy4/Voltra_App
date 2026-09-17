@@ -7,9 +7,30 @@ import { apiFetch } from "../../../lib/apiFetch";
 type PaymentDetail = {
   id: number;
   transactionId: string | null;
-  amount: number | string;
-  status: "PENDING" | "PAID" | "FAILED" | "REFUNDED";
-  paymentMethod: "CARD" | "E_WALLET";
+
+  // Original payment
+  amount?: number | string;
+
+  // Booking adjustment
+  adjustmentAmount?: number | string;
+  type?: "ADDITIONAL_PAYMENT" | "REFUND";
+
+  status:
+    | "PENDING"
+    | "PAID"
+    | "FAILED"
+    | "REFUNDED"
+    | "COMPLETED"
+    | "CANCELLED";
+
+  paymentStatus?: "PENDING" | "PAID" | "FAILED";
+
+  paymentMethod:
+    | "CARD"
+    | "E_WALLET"
+    | "CASH"
+    | null;
+
   createdAt: string;
 
   booking: {
@@ -33,10 +54,23 @@ export default function TransactionDetailPage() {
   const params = useParams();
   const router = useRouter();
 
-  const rawPaymentId = params.id;
-  const paymentId = Array.isArray(rawPaymentId)
-    ? rawPaymentId[0]
-    : rawPaymentId;
+  const rawTransactionId = params.id;
+  const transactionRouteId = Array.isArray(rawTransactionId)
+    ? rawTransactionId[0]
+    : rawTransactionId;
+
+  const isOriginalPayment =
+    transactionRouteId?.startsWith("PAYMENT-") ?? false;
+
+  const isAdjustment =
+    transactionRouteId?.startsWith("ADJUSTMENT-") ?? false;
+
+  const transactionNumericId = transactionRouteId
+    ? transactionRouteId.replace(
+        /^(PAYMENT|ADJUSTMENT)-/,
+        ""
+      )
+    : "";
 
   const [payment, setPayment] = useState<PaymentDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,32 +78,47 @@ export default function TransactionDetailPage() {
 
   useEffect(() => {
     const fetchPayment = async () => {
-      if (!paymentId || !/^\d+$/.test(paymentId)) {
-        setError("Invalid payment ID.");
+      if (
+        !transactionRouteId ||
+        (!isOriginalPayment && !isAdjustment) ||
+        !/^\d+$/.test(transactionNumericId)
+      ) {
+        setError("Invalid transaction ID.");
         setIsLoading(false);
         return;
       }
 
       try {
-        const response = await apiFetch(`/payments/${paymentId}`);
+        setIsLoading(true);
+        setError("");
+
+        const endpoint = isOriginalPayment
+          ? `/payments/${transactionNumericId}`
+          : `/payments/adjustments/${transactionNumericId}`;
+
+        const response = await apiFetch(endpoint);
         const result = await response.json();
 
         if (!response.ok) {
           throw new Error(
             Array.isArray(result.message)
               ? result.message.join(", ")
-              : result.message || "Failed to fetch payment."
+              : result.message ||
+                  "Failed to fetch transaction."
           );
         }
 
         setPayment(result.data);
       } catch (error) {
-        console.error("Failed to fetch payment:", error);
+        console.error(
+          "Failed to fetch transaction:",
+          error
+        );
 
         setError(
           error instanceof Error
             ? error.message
-            : "Failed to fetch payment."
+            : "Failed to fetch transaction."
         );
       } finally {
         setIsLoading(false);
@@ -77,7 +126,12 @@ export default function TransactionDetailPage() {
     };
 
     fetchPayment();
-  }, [paymentId]);
+  }, [
+    transactionRouteId,
+    transactionNumericId,
+    isOriginalPayment,
+    isAdjustment,
+  ]);
 
   if (isLoading) {
     return (
@@ -109,6 +163,32 @@ export default function TransactionDetailPage() {
     );
   }
 
+  const transactionAmount =
+    payment.type === "ADDITIONAL_PAYMENT" ||
+    payment.type === "REFUND"
+      ? Number(payment.adjustmentAmount)
+      : Number(payment.amount);
+
+  const transactionLabel =
+    payment.type === "ADDITIONAL_PAYMENT"
+      ? "Additional Payment Successful"
+      : payment.type === "REFUND"
+        ? "Refund Processed"
+        : payment.status === "PAID"
+          ? "Payment Successful"
+          : payment.status === "PENDING"
+            ? "Payment Pending"
+            : payment.status === "FAILED"
+              ? "Payment Failed"
+              : "Payment Refunded";
+
+  const displayStatus =
+    payment.type === "ADDITIONAL_PAYMENT"
+      ? payment.paymentStatus ?? payment.status
+      : payment.type === "REFUND"
+        ? "REFUNDED"
+        : payment.status;
+
   return (
     <main className="min-h-screen bg-background px-6 py-10">
       <div className="mx-auto max-w-3xl">
@@ -135,7 +215,7 @@ export default function TransactionDetailPage() {
 
                 <span
                 className={`rounded-full px-5 py-2 text-sm font-bold ${
-                    payment.status === "PAID"
+                    payment.status === "PAID" || payment.status === "COMPLETED"
                     ? "bg-emerald-100 text-emerald-700"
                     : payment.status === "PENDING"
                     ? "bg-yellow-100 text-yellow-700"
@@ -151,21 +231,19 @@ export default function TransactionDetailPage() {
             {/* PAYMENT RESULT */}
             <div className="mt-8 rounded-2xl border border-primary-green/20 bg-[#eefbf4] p-8 text-center">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary-green text-3xl font-bold text-white">
-                {payment.status === "PAID" ? "✓" : "•"}
+                {displayStatus === "PAID" ||
+                displayStatus === "REFUNDED"
+                  ? "✓"
+                  : "•"}
                 </div>
 
                 <p className="mt-4 text-xl font-bold text-primary-green">
-                {payment.status === "PAID"
-                    ? "Payment Successful"
-                    : payment.status === "PENDING"
-                    ? "Payment Pending"
-                    : payment.status === "FAILED"
-                    ? "Payment Failed"
-                    : "Payment Refunded"}
+                  {transactionLabel}
                 </p>
 
                 <p className="mt-3 text-4xl font-bold">
-                Rp {Number(payment.amount).toLocaleString("id-ID")}
+                  {payment.type === "REFUND" ? "- " : ""}
+                  Rp {transactionAmount.toLocaleString("id-ID")}
                 </p>
 
                 <p className="mt-5 text-sm text-text-secondary">
@@ -223,26 +301,6 @@ export default function TransactionDetailPage() {
                         {payment.paymentMethod === "CARD"
                             ? "Card"
                             : "E-Wallet"}
-                        </span>
-                    </div>
-
-                    <div className="flex gap-4 justify-between">
-                        <span className="text-text-secondary">
-                        Payment Status
-                        </span>
-
-                        <span
-                        className={`w-fit rounded-full px-3 py-1 text-xs font-bold ${
-                            payment.status === "PAID"
-                            ? "bg-paid text-white"
-                            : payment.status === "PENDING"
-                            ? "bg-pending text-yellow-700"
-                            : payment.status === "FAILED"
-                            ? "bg-failed text-red-700"
-                            : "bg-gray-100 text-gray-700"
-                        }`}
-                        >
-                        {payment.status}
                         </span>
                     </div>
 

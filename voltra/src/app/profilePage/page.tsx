@@ -15,14 +15,32 @@ type User = {
   role: "USER" | "ADMIN";
 };
 
-type Payment = {
-  id: number;
+type PaymentHistoryItem = {
+  id: string;
   bookingId: number;
-  amount: string | number;
-  status: "PENDING" | "PAID" | "FAILED" | "REFUNDED";
-  paymentMethod: "CASH" | "CARD" | "E_WALLET";
+  bookingCode: string;
+
+  type:
+    | "PAYMENT"
+    | "ADDITIONAL_PAYMENT"
+    | "REFUND";
+
+  amount: number;
+
+  status:
+    | "PENDING"
+    | "PAID"
+    | "FAILED"
+    | "REFUNDED";
+
+  paymentMethod:
+    | "CASH"
+    | "CARD"
+    | "E_WALLET"
+    | null;
+
+  transactionId: string | null;
   createdAt: string;
-  updatedAt: string;
 };
 
 export default function ProfilePage() {
@@ -36,7 +54,7 @@ export default function ProfilePage() {
     phoneNumber: "",
   });
 
-  const [payments, setPayments] = useState<Payment[]>([]);
+  const [payments, setPayments] = useState<PaymentHistoryItem[]>([]);
   const [isPaymentsLoading, setIsPaymentsLoading] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
@@ -122,7 +140,7 @@ export default function ProfilePage() {
       try {
         setIsPaymentsLoading(true);
 
-        const response = await apiFetch("/payments");
+        const response = await apiFetch("/payments/history");
         const result = await response.json();
 
         if (!response.ok) {
@@ -615,11 +633,32 @@ export default function ProfilePage() {
                         >
                           <div className="flex items-start justify-between gap-4">
                             <div>
-                              <p className="text-sm text-text-secondary">
-                                Payment #{payment.id}
+                              <p className="text-sm font-semibold text-text-secondary">
+                                {payment.type === "PAYMENT"
+                                  ? "Original Payment"
+                                  : payment.type === "ADDITIONAL_PAYMENT"
+                                    ? "Additional Payment"
+                                    : "Refund"}
                               </p>
 
-                              <p className="mt-1 text-xl font-bold">
+                              <p className="mt-1 text-sm text-text-secondary">
+                                {payment.bookingCode}
+                              </p>
+
+                              <p
+                                className={`mt-2 text-xl font-bold ${
+                                  payment.type === "REFUND"
+                                    ? "text-red-600"
+                                    : payment.type === "ADDITIONAL_PAYMENT"
+                                      ? "text-primary-green"
+                                      : ""
+                                }`}
+                              >
+                                {payment.type === "REFUND"
+                                  ? "- "
+                                  : payment.type === "ADDITIONAL_PAYMENT"
+                                    ? "+ "
+                                    : ""}
                                 Rp {Number(payment.amount).toLocaleString("id-ID")}
                               </p>
                             </div>
@@ -646,7 +685,7 @@ export default function ProfilePage() {
                               </p>
 
                               <p className="mt-1 font-semibold">
-                                #{payment.bookingId}
+                                #{payment.bookingCode}
                               </p>
                             </div>
 
@@ -682,9 +721,21 @@ export default function ProfilePage() {
                             </div>
                           </div>
 
+                          {payment.transactionId && (
+                            <div className="mt-5 border-b border-border-soft py-4">
+                              <p className="text-sm text-text-secondary">
+                                Transaction ID
+                              </p>
+
+                              <p className="mt-1 break-all font-semibold">
+                                {payment.transactionId}
+                              </p>
+                            </div>
+                          )}
+
                           <Link
                             href={`/payment/transaction/${payment.id}`}
-                            className="mt-5 inline-block font-semibold text-primary-green hover:underline"
+                            className="mt-4 flex font-semibold text-primary-green hover:underline justify-center items-center"
                           >
                             View Transaction
                           </Link>

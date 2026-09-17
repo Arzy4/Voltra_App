@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import Button from "../components/button";
 import Input from "../components/input";
 import { createPortal } from "react-dom";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginForm() {
     const router = useRouter();
     
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
 
     const [redirectPath, setRedirectPath] = useState("/stationPage");
 
@@ -116,12 +118,29 @@ export default function LoginForm() {
                 onChange={(e) => setEmail(e.target.value)}
             />
 
-            <Input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-            />
+            <div className="relative">
+                <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="w-full rounded-lg border border-border-soft px-4 py-3 pr-12 outline-none focus:border-primary-green"
+                />
+
+                <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary-green"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                    {showPassword ? (
+                    <EyeOff size={20} />
+                    ) : (
+                    <Eye size={20} />
+                    )}
+                </button>
+            </div>
+            
             <Button text="Login" />
             
             {modal.open && (

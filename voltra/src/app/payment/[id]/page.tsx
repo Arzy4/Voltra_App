@@ -67,6 +67,57 @@ export default function PaymentPage() {
       });
     };
 
+    function handleCardNumberChange(
+      e: React.ChangeEvent<HTMLInputElement>
+    ) {
+      const digits = e.target.value
+        .replace(/\D/g, "")
+        .slice(0, 16);
+
+      const formatted = digits.replace(
+        /(\d{4})(?=\d)/g,
+        "$1 "
+      );
+
+      setCardNumber(formatted);
+    }
+
+    function handleCardExpiryChange(
+      e: React.ChangeEvent<HTMLInputElement>
+    ) {
+      let digits = e.target.value.replace(/\D/g, "");
+
+      // Maximum: MMYY
+      digits = digits.slice(0, 4);
+
+      // Month cannot exceed 12
+      if (digits.length >= 2) {
+        const month = Number(digits.slice(0, 2));
+
+        if (month > 12) {
+          digits = `12${digits.slice(2)}`;
+        }
+      }
+
+      if (digits.length > 2) {
+        setExpiryDate(
+          `${digits.slice(0, 2)} / ${digits.slice(2)}`
+        );
+      } else {
+        setExpiryDate(digits);
+      }
+    }
+
+    function handleCvvChange(
+      e: React.ChangeEvent<HTMLInputElement>
+    ) {
+      const digits = e.target.value
+        .replace(/\D/g, "")
+        .slice(0, 3);
+
+      setCvv(digits);
+    }
+
     useEffect(() => {
       const fetchBooking = async () => {
         try {
@@ -380,10 +431,10 @@ return (
 
                         <input
                           type="text"
+                          inputMode="numeric"
                           value={cardNumber}
-                          onChange={(e) =>
-                            setCardNumber(e.target.value)
-                          }
+                          onChange={handleCardNumberChange}
+                          maxLength={19}
                           placeholder="1234 5678 9012 3456"
                           className="mt-2 w-full rounded-lg border border-border-soft bg-white px-4 py-3 outline-none transition focus:border-primary-green"
                         />
@@ -397,10 +448,10 @@ return (
 
                           <input
                             type="text"
+                            inputMode="numeric"
                             value={expiryDate}
-                            onChange={(e) =>
-                              setExpiryDate(e.target.value)
-                            }
+                            onChange={handleCardExpiryChange}
+                            maxLength={7}
                             placeholder="MM / YY"
                             className="mt-2 w-full rounded-lg border border-border-soft bg-white px-4 py-3 outline-none transition focus:border-primary-green"
                           />
@@ -412,12 +463,12 @@ return (
                           </label>
 
                           <input
-                            type="password"
+                            type="text"
+                            inputMode="numeric"
                             value={cvv}
-                            onChange={(e) =>
-                              setCvv(e.target.value)
-                            }
-                            placeholder="***"
+                            onChange={handleCvvChange}
+                            maxLength={3}
+                            placeholder="123"
                             className="mt-2 w-full rounded-lg border border-border-soft bg-white px-4 py-3 outline-none transition focus:border-primary-green"
                           />
                         </div>
