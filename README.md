@@ -109,7 +109,7 @@ Before installing the project, make sure the following requirements are availabl
 Clone the VOLTRA frontend repository from GitHub to your local computer:
 
 ```bash
-git clone <YOUR-FRONTEND-REPOSITORY-URL>
+git clone <https://github.com/Revou-FSSE-Feb26/crack-fe-Arzy4.git>
 ```
 
 This command creates a local copy of the VOLTRA frontend source code.
@@ -121,7 +121,7 @@ This command creates a local copy of the VOLTRA frontend source code.
 After cloning the repository, navigate into the VOLTRA frontend project directory:
 
 ```bash
-cd <YOUR-PROJECT-FOLDER>
+cd <voltra>
 ```
 
 Make sure the terminal is running inside the project directory before installing the required dependencies.
