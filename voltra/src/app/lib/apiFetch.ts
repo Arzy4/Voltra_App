@@ -42,6 +42,13 @@ export async function apiFetch(
     if (!refreshResponse.ok) {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
+      localStorage.removeItem("currentUser");
+      
+      document.cookie =
+        "accessToken=; path=/; max-age=0; SameSite=Lax";
+
+      document.cookie =
+        "userRole=; path=/; max-age=0; SameSite=Lax";
 
       throw new Error(
         refreshResult.message ||
@@ -55,6 +62,8 @@ export async function apiFetch(
       "accessToken",
       refreshResult.accessToken
     );
+
+    document.cookie = `accessToken=${refreshResult.accessToken}; path=/; max-age=3600; SameSite=Lax`;
 
     response = await fetch(`${apiUrl}${endpoint}`, {
       ...options,

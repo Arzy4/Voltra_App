@@ -81,11 +81,15 @@ export default function LoginForm() {
             localStorage.setItem("accessToken", result.accessToken);
             localStorage.setItem("refreshToken", result.refreshToken);
 
+            document.cookie = `accessToken=${result.accessToken}; path=/; max-age=3600; SameSite=Lax`;
+
             if (result.user) {
                 localStorage.setItem(
                     "currentUser",
                     JSON.stringify(result.user)
                 );
+
+                document.cookie = `userRole=${result.user.role}; path=/; max-age=3600; SameSite=Lax`;
 
                 if (result.user.role === "ADMIN") {
                     setRedirectPath("/admin");

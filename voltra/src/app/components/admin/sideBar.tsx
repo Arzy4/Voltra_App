@@ -245,6 +245,12 @@ export default function AdminSidebar({
                     localStorage.removeItem("refreshToken");
                     localStorage.removeItem("currentUser");
 
+                    document.cookie =
+                      "accessToken=; path=/; max-age=0; SameSite=Lax";
+
+                    document.cookie =
+                      "userRole=; path=/; max-age=0; SameSite=Lax";
+
                     setCurrentUser(null);
 
                     setModal({
