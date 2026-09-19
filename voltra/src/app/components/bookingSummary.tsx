@@ -103,14 +103,15 @@ export default function BookingSummary({
   return (
     <>
       {/* HEADER */}
-      <div className="flex items-start justify-between gap-6">
+      <div className="flex items-start justify-between gap-3 sm:gap-6">
         <div>
           <button
             type="button"
             onClick={onBack}
-            className="mb-5 font-semibold text-primary-green hover:underline"
+            className="mb-4 sm:mb-5 inline-flex items-center gap-1 text-sm sm:text-base font-semibold text-primary-green hover:underline"
           >
-            ← Back to Charging Schedule
+            <span className="shrink-0">←</span>
+            <span>Back to Charging Slots</span>
           </button>
 
           <h2 className="mt-1 text-3xl font-bold">
@@ -139,43 +140,43 @@ export default function BookingSummary({
           Charging Details
         </h3>
 
-        <div className="mt-3 grid grid-cols-2 gap-5 rounded-2xl bg-white p-5">
-          <div>
+        <div className="mt-3 grid grid-cols-1 gap-4 rounded-2xl bg-white p-4 sm:grid-cols-2 sm:gap-5 sm:p-5">
+          <div className="flex items-center justify-between gap-4 lg:block">
             <p className="text-sm text-text-secondary">
               Charging Slot
             </p>
 
-            <p className="mt-1 font-bold">
+            <p className="lg:mt-1 font-bold">
               {slotCode}
             </p>
           </div>
 
-          <div>
+          <div className="flex items-center justify-between gap-4 lg:block">
             <p className="text-sm text-text-secondary">
               Charger Type
             </p>
 
-            <p className="mt-1 font-bold">
+            <p className="lg:mt-1 font-bold">
               {type}
             </p>
           </div>
 
-          <div>
+          <div className="flex items-center justify-between gap-4 lg:block">
             <p className="text-sm text-text-secondary">
               Charging Power
             </p>
 
-            <p className="mt-1 font-bold">
+            <p className="lg:mt-1 font-bold">
               {power} kW
             </p>
           </div>
 
-          <div>
+          <div className="flex items-center justify-between gap-4 lg:block">
             <p className="text-sm text-text-secondary">
               Price
             </p>
 
-            <p className="mt-1 font-bold">
+            <p className="lg:mt-1 font-bold">
               Rp {pricePerKwh.toLocaleString("id-ID")} / kWh
             </p>
           </div>
@@ -188,43 +189,43 @@ export default function BookingSummary({
           Schedule
         </h3>
 
-        <div className="mt-3 grid grid-cols-2 gap-5 rounded-2xl bg-white p-5">
-          <div>
+        <div className="mt-3 grid grid-cols-1 gap-4 rounded-2xl bg-white p-4 sm:grid-cols-2 sm:gap-5 sm:p-5">
+          <div className="flex items-center justify-between gap-4 lg:block">
             <p className="text-sm text-text-secondary">
               Date
             </p>
 
-            <p className="mt-1 font-bold">
+            <p className="lg:mt-1 font-bold">
               {selectedDate}
             </p>
           </div>
 
-          <div>
+          <div className="flex items-center justify-between gap-4 lg:block">
             <p className="text-sm text-text-secondary">
               Start Time
             </p>
 
-            <p className="mt-1 font-bold">
+            <p className="lg:mt-1 font-bold">
               {startTime}
             </p>
           </div>
 
-          <div>
+          <div className="flex items-center justify-between gap-4 lg:block">
             <p className="text-sm text-text-secondary">
               Duration
             </p>
 
-            <p className="mt-1 font-bold">
+            <p className="lg:mt-1 font-bold">
               {formatDuration()}
             </p>
           </div>
 
-          <div>
+          <div className="flex items-center justify-between gap-4 lg:block">
             <p className="text-sm text-text-secondary">
               End Time
             </p>
 
-            <p className="mt-1 font-bold">
+            <p className="lg:mt-1 font-bold">
               {calculateEndTime()}
             </p>
           </div>
@@ -237,7 +238,7 @@ export default function BookingSummary({
           Price Summary
         </h3>
 
-        <div className="mt-3 rounded-2xl bg-[#c2f3db] p-5">
+        <div className="mt-3 rounded-2xl bg-[#c2f3db] p-4 sm:p-5">
           <div className="flex items-center justify-between">
             <p className="text-text-secondary">
               Price / kWh
@@ -260,12 +261,12 @@ export default function BookingSummary({
 
           <hr className="my-4 border-primary-green/20" />
 
-          <div className="flex items-center justify-between">
-            <p className="text-lg font-bold">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4 text-center">
+            <p className="text-base sm:text-lg font-bold">
               Estimated Total
             </p>
 
-            <p className="text-2xl font-bold text-primary-green">
+            <p className="text-xl sm:text-2xl font-bold text-primary-green">
               Rp {estimatedTotal.toLocaleString("id-ID")}
             </p>
           </div>

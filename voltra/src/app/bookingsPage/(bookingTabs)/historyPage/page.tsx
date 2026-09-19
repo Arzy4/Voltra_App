@@ -92,18 +92,18 @@ export default function HistoryPage() {
               key={booking.id}
               className="rounded-2xl bg-white p-6 shadow-sm"
             >
-              <div className="flex items-start justify-between gap-4">
-                <div>
+              <div className="flex items-start justify-between gap-2 sm:gap-4">
+                <div className="min-w-0 flex-1">
                   <p className="text-sm text-text-secondary">
                     Booking Code
                   </p>
 
-                  <h2 className="text-xl font-bold">
+                  <h2 className="whitespace-nowrap text-base sm:text-xl font-bold">
                     {booking.bookingCode}
                   </h2>
                 </div>
 
-                <span className="rounded-full bg-[#c2f3db] px-4 py-1 text-sm font-semibold text-primary-green">
+                <span className="shrink-0 rounded-full bg-[#c2f3db] px-3 sm:px-4 py-1 text-xs sm:text-sm font-semibold text-primary-green">
                   {booking.status}
                 </span>
               </div>

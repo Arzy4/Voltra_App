@@ -100,14 +100,14 @@ export default function ChargingOptionCard({
   return (
     <>
       {/* CHARGING OPTION CARD */}
-      <div className="flex flex-col rounded-3xl bg-[#c2f3db] p-7 shadow-lg">
+      <div className="flex flex-col rounded-2xl sm:rounded-3xl bg-[#c2f3db] p-5 sm:p-7 shadow-lg">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="font-semibold text-primary-green">
+            <p className="text-sm sm:text-base font-semibold text-primary-green">
               {type.toUpperCase()} CHARGING
             </p>
 
-            <h3 className="mt-2 text-3xl font-bold">
+            <h3 className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold">
               {power} kW
             </h3>
           </div>
@@ -117,7 +117,7 @@ export default function ChargingOptionCard({
           </span>
         </div>
 
-        <hr className="my-6 border-primary-green/20" />
+        <hr className="my-4 sm:my-6 border-primary-green/20" />
 
         {/* PRICE */}
         <div>
@@ -134,7 +134,7 @@ export default function ChargingOptionCard({
         </div>
 
         {/* SLOT USAGE */}
-        <div className="mt-6">
+        <div className="mt-4 sm:mt-6">
           <p className="text-sm text-text-secondary">
             Slot Usage
           </p>
@@ -154,7 +154,7 @@ export default function ChargingOptionCard({
         <button
           type="button"
           onClick={handleOpenModal}
-          className="mt-8 w-full rounded-xl bg-primary-green px-6 py-3 font-semibold text-white duration-300 hover:opacity-90"
+          className="mt-5 sm:mt-8 w-full rounded-xl bg-primary-green px-4 sm:px-6 py-3 text-sm sm:text-base font-semibold text-white duration-300 hover:opacity-90"
         >
           View Charging Slots
         </button>

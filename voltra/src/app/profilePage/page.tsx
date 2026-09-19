@@ -337,22 +337,22 @@ export default function ProfilePage() {
   }, []);
 
   return (
-    <main className="h-screen overflow-hidden bg-background">
-      <div className="mx-auto flex h-full max-w-6xl flex-col px-6 py-10">
-        <h1 className="mb-8 shrink-0 text-3xl font-bold text-primary-green">
+    <main className="min-h-screen bg-background">
+      <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 sm:px-6 pt-6 sm:pt-10 pb-22 md:pb-10">
+        <h1 className="mb-6 sm:mb-8 shrink-0 text-2xl sm:text-3xl font-bold text-primary-green">
           Profile
         </h1>
 
-        <div className="grid h-[600px] gap-8 md:grid-cols-[260px_1fr]">
+        <div className="grid grid-cols-1 gap-6 md:h-[600px] md:grid-cols-[260px_1fr] md:gap-8">
           {/* LEFT SIDEBAR */}
-          <aside className="h-full overflow-hidden rounded-2xl bg-white px-5 py-10 shadow-sm">
-            <div className="border-b border-border-soft pb-6 text-center">
+          <aside className="rounded-2xl bg-white px-4 sm:px-5 py-6 md:h-full md:overflow-hidden md:py-10 shadow-sm">
+            <div className="border-b border-border-soft pb-4 md:pb-6 text-center">
               <Image
                 src="/avatar_placeholder.png"
                 alt="Profile Picture Default"
                 width={100}
                 height={100}
-                className="mx-auto rounded-full"
+                className="mx-auto h-20 w-20 md:h-[100px] md:w-[100px] rounded-full"
               />
 
               <h2 className="mt-4 text-lg font-bold">
@@ -364,10 +364,10 @@ export default function ProfilePage() {
               </p>
             </div>
 
-            <nav className="mt-6">
+            <nav className="hide-scrollbar mt-4 flex gap-2 overflow-x-auto pb-2 md:mt-6 md:block md:overflow-visible md:pb-0">
               <button
                 onClick={() => setActiveSection("account")}
-                className={`w-full rounded-lg border-l-4 px-4 py-3 text-left transition ${
+                className={`w-full rounded-lg border-l-4 px-3 py-3 text-center text-sm transition md:px-4 md:text-base md:text-left ${
                   activeSection === "account"
                     ? "border-primary-green bg-[#c2f3db] font-semibold text-primary-green"
                     : "border-transparent hover:bg-gray-50"

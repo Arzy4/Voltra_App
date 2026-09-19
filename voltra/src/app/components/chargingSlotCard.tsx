@@ -52,14 +52,15 @@ export default function ChargingSlotCard({
   return (
     <>
       {/* SLOT DETAIL HEADER */}
-      <div className="flex items-start justify-between gap-6">
+      <div className="flex items-start justify-between gap-3 sm:gap-6">
         <div>
           <button
             type="button"
             onClick={onBack}
-            className="mb-5 font-semibold text-primary-green hover:underline"
+            className="mb-4 sm:mb-5 inline-flex items-center gap-1 text-sm sm:text-base font-semibold text-primary-green hover:underline"
           >
-            ← Back to Charging Slots
+            <span className="shrink-0">←</span>
+            <span>Back to Charging Slots</span>
           </button>
 
           <p className="font-semibold text-primary-green">

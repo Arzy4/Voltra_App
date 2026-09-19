@@ -168,8 +168,8 @@ export default async function StationDetailPage({
     const displayStatus: DisplayStatus = getDisplayStatus();
 
     return (
-        <main className="min-h-screen bg-[#e3fff1] px-8 py-12 lg:px-20">
-            <section className="grid items-center gap-12 lg:grid-cols-[1fr_1fr]">
+        <main className="min-h-screen bg-[#e3fff1] px-4 sm:px-8 lg:px-20 pt-8 sm:pt-12 pb-10 lg:pb-12">
+            <section className="grid grid-cols-1 items-center gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-12">
 
                 {/* LEFT - Station Information */}
                 <div>
@@ -181,17 +181,17 @@ export default async function StationDetailPage({
                         Back to Stations
                     </Link>
 
-                    <h1 className="text-4xl font-bold">
+                    <h1 className="text-3xl sm:text-4xl font-bold leading-tight text-center">
                         {station.name}
                     </h1>
 
-                    <p className="mt-2 text-lg">
+                    <p className="mt-2 text-base sm:text-lg leading-relaxed text-center">
                         {station.location}, {station.address}
                     </p>
 
-                    <div className="mt-6">
+                    <div className="mt-6 text-center">
                     <span
-                        className={`w-full max-w-[110px] rounded-full px-6 py-4 text-center text-md font-semibold ${
+                        className={`inline-flex items-center justify-center rounded-full px-5 py-2.5 sm:px-6 sm:py-3 text-sm sm:text-base font-semibold ${
                         statusStyles[displayStatus]
                         }`}
                     >
@@ -202,38 +202,38 @@ export default async function StationDetailPage({
 
                 {/* RIGHT - Charging Availability */}
                 <div>
-                    <h2 className="pt-4 pb-2 text-3xl font-bold">
+                    <h2 className="py-4 sm:pt-4 text-2xl sm:text-3xl font-bold text-center">
                     Charging Availability
                     </h2>
 
-                    <div className="grid grid-cols-3 rounded-3xl bg-primary-green p-8 text-white">
+                    <div className="grid grid-cols-3 rounded-2xl sm:rounded-3xl bg-primary-green px-3 py-6 sm:p-8 text-white">
 
                     <div className="text-center">
-                        <p className="text-sm opacity-80">
+                        <p className="text-xs sm:text-sm opacity-80">
                         Total Slots
                         </p>
 
-                        <p className="mt-2 text-4xl font-bold">
+                        <p className="mt-2 text-2xl sm:text-3xl lg:text-4xl font-bold">
                         {totalSlots}
                         </p>
                     </div>
 
                     <div className="text-center">
-                        <p className="text-sm opacity-80">
+                        <p className="text-xs sm:text-sm opacity-80">
                         Available
                         </p>
 
-                        <p className="mt-2 text-4xl font-bold">
+                        <p className="mt-2 text-2xl sm:text-3xl lg:text-4xl font-bold">
                         {availableSlots}
                         </p>
                     </div>
 
                     <div className="text-center">
-                        <p className="text-sm opacity-80">
+                        <p className="text-xs sm:text-sm opacity-80">
                         In Use
                         </p>
 
-                        <p className="mt-2 text-4xl font-bold">
+                        <p className="mt-2 text-2xl sm:text-3xl lg:text-4xl font-bold">
                         {usedSlots}
                         </p>
                     </div>
@@ -243,12 +243,12 @@ export default async function StationDetailPage({
 
                 </section>
 
-            <section className="mt-14">
-                <h2 className="mb-6 text-3xl font-bold">
+            <section className="mt-10 sm:mt-14">
+                <h2 className="mb-5 sm:mb-6 text-2xl sm:text-3xl font-bold text-center">
                     Charging Options
                 </h2>
 
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                     {chargingTypes.map((charger) => (
                         <ChargingOptionCard
                         key={charger.type}

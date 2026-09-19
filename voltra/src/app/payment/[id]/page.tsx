@@ -247,12 +247,12 @@ export default function PaymentPage() {
     }
 
 return (
-  <main className="min-h-screen bg-background px-6 py-13">
-    <div className="mx-auto h-[680px] max-w-5xl overflow-hidden rounded-3xl bg-white shadow-lg">
-      <div className="grid h-full md:grid-cols-2">
+  <main className="min-h-screen bg-background px-4 py-6 sm:px-6 sm:py-10 lg:py-13">
+    <div className="mx-auto w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-lg md:h-[680px]">
+      <div className="grid md:h-full md:grid-cols-2">
 
         {/* LEFT SIDE - PAYMENT SUMMARY */}
-        <section className="h-full p-8 md:p-12">
+        <section className="h-full p-5 sm:p-8 md:p-10 lg:p-12">
           <Link
             href="/bookingsPage/activePage"
             className="mb-4 inline-flex cursor-pointer items-center gap-2 font-semibold text-primary-green transition hover:opacity-70"
@@ -261,7 +261,7 @@ return (
             Back to Bookings
           </Link>
 
-          <h1 className="text-4xl font-bold text-primary-green">
+          <h1 className="text-3xl sm:text-4xl font-bold text-primary-green">
             Payment
           </h1>
 
@@ -276,7 +276,7 @@ return (
           <div className="my-4 border-t border-border-soft" />
 
           <div className="space-y-6">
-            <div className="grid grid-cols-[140px_1fr] gap-4">
+            <div className="grid grid-cols-[110px_1fr] gap-3 sm:grid-cols-[140px_1fr] sm:gap-4">
               <span className="text-text-secondary">
                 Station
               </span>
@@ -341,7 +341,7 @@ return (
                   Amount to pay
                 </span>
 
-                <span className="text-3xl font-bold text-primary-green">
+                <span className="text-xl sm:text-2xl md:text-3xl font-bold text-primary-green">
                   Rp{" "}
                   {Number(
                     booking.estimatedCost
