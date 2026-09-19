@@ -18,7 +18,7 @@ export default function AuthPage ({
     const isRegister = mode === "register";
 
     return (
-        <main className="min-h-screen flex items-center justify-center p-6">
+        <main className="min-h-screen flex items-center justify-center p-4 sm:p-6">
             <div className={`auth-container ${
                 isRegister ? "active" : ""
                 }`}

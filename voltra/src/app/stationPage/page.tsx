@@ -210,7 +210,7 @@ function getStationDisplayStatus(
       </div>
 
       {/* Search bar */}
-      <div className="absolute top-4 left-1/2 z-30 w-full max-w-[700px] -translate-x-1/2 px-4">
+      <div className="absolute top-4 sm:top-5 left-1/2 z-30 w-[calc(80%-2rem)] sm:w-[75%] md:w-[65%] lg:w-[55%] max-w-[700px] -translate-x-1/2">
         <Input
           type="text"
           placeholder="Search charging station..."
@@ -239,8 +239,8 @@ function getStationDisplayStatus(
         </div>
 
         {/* Scrollable cards */}
-        <div className="hide-scrollbar min-h-0 flex-1 overflow-y-auto px-6 pb-6">
-          <div className="hide-scrollbar grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="hide-scrollbar min-h-0 flex-1 overflow-y-auto px-4 sm:px-12 pb-6 justify-items-center">
+          <div className="hide-scrollbar grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-5">
             {isLoading ? (
               <p className="col-span-full py-10 text-center text-text-secondary">
                 Loading charging stations...
