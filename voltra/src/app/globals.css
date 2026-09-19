@@ -167,7 +167,7 @@ body {
 /* Mission / Vision */
 .drives {
   position: relative;
-  height: 90svh;
+  min-height: 90svh;
   color: white;
   display: flex;
   flex-direction: column;
