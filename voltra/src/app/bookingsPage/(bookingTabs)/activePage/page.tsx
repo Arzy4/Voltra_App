@@ -24,6 +24,18 @@ export default function ActivePage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const getBookingStatusStyle = (status: Booking["status"]) => {
+    if (status === "PENDING") {
+      return "bg-orange-100 text-orange-600";
+    }
+
+    if (status === "CANCELLED") {
+      return "bg-red-100 text-red-600";
+    }
+
+    return "bg-[#c2f3db] text-primary-green";
+  };
+
   useEffect(() => {
     const fetchBookings = async () => {
       try {
@@ -105,7 +117,11 @@ export default function ActivePage() {
                     </h2>
                   </div>
 
-                  <span className="shrink-0 rounded-full bg-[#c2f3db] px-3 py-1 text-xs font-semibold text-primary-green sm:px-4 sm:text-sm">
+                  <span 
+                    className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold sm:px-4 sm:text-sm ${getBookingStatusStyle(
+                      booking.status
+                    )}`}
+                  >
                     {booking.status}
                   </span>
                 </div>

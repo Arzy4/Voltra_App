@@ -107,6 +107,21 @@ export default function BookingDetailPage() {
 
   const [showCancelModal, setShowCancelModal] = useState(false);
 
+  const [isCancellationSuccess, setIsCancellationSuccess] =
+    useState(false);
+
+  const getBookingStatusStyle = (status: BookingDetail["status"]) => {
+    if (status === "PENDING") {
+      return "bg-orange-100 text-orange-600";
+    }
+
+    if (status === "CANCELLED") {
+      return "bg-red-100 text-red-600";
+    }
+
+    return "bg-[#c2f3db] text-primary-green";
+  };
+
   const [modal, setModal] = useState({
       open: false,
       type: "success" as "success" | "error",
@@ -240,11 +255,23 @@ export default function BookingDetailPage() {
       );
 
       setShowCancelModal(false);
+      setIsCancellationSuccess(true);
+
+      const refundedAmount = booking.payment?.status === "PAID"
+        ? Number(
+            booking.netPaidAmount ??
+            booking.payment.amount
+          )
+        : 0;
 
       showModal(
         "success",
         "Booking Cancelled",
-        `Booking ${booking.bookingCode} has been cancelled successfully.`
+        refundedAmount > 0
+          ? `Booking ${booking.bookingCode} has been cancelled. Rp ${refundedAmount.toLocaleString(
+              "id-ID"
+            )} has been refunded.`
+          : `Booking ${booking.bookingCode} has been cancelled successfully.`
       );
     } catch (error) {
       const message =error instanceof Error
@@ -459,7 +486,8 @@ export default function BookingDetailPage() {
             </p>
           </div>
 
-          <span className="w-fit shrink-0 self-center sm:self-auto rounded-full bg-white px-4 py-1 text-sm sm:text-lg font-semibold text-primary-green">
+          <span className={`w-fit shrink-0 self-center rounded-full px-4 py-1 text-sm font-semibold sm:self-auto sm:text-lg ${getBookingStatusStyle(booking.status)}`}
+          >
             {booking.status}
           </span>
         </div>
@@ -1066,7 +1094,11 @@ export default function BookingDetailPage() {
                 }));
 
                 if (modal.type === "success") {
-                  window.location.reload();
+                  if (isCancellationSuccess) {
+                    router.push("/bookingsPage/historyPage");
+                  } else {
+                    window.location.reload();
+                  }
                 }
               }}
               className={`mt-7 w-full cursor-pointer rounded-xl px-4 py-3 font-semibold text-white duration-300 ${
@@ -1098,9 +1130,31 @@ export default function BookingDetailPage() {
               ?
             </p>
 
-            <p className="mt-3 text-sm text-red-500">
-              This action will mark your booking as cancelled.
-            </p>
+            {booking.payment?.status === "PAID" ? (
+              <div className="mt-4 rounded-xl bg-[#e3fff1] p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-sm text-gray-600">
+                    Refund Amount
+                  </span>
+
+                  <span className="font-bold text-primary-green">
+                    Rp{" "}
+                    {Number(
+                      booking.netPaidAmount ?? booking.payment.amount
+                    ).toLocaleString("id-ID")}
+                  </span>
+                </div>
+
+                <p className="mt-2 text-xs leading-5 text-gray-500">
+                  Your current net paid amount will be refunded when
+                  this booking is cancelled.
+                </p>
+              </div>
+            ) : (
+              <p className="mt-3 text-sm text-gray-500">
+                This booking has not been paid, so no refund is required.
+              </p>
+            )}
 
             <div className="mt-6 flex justify-end gap-3">
               <button
