@@ -251,26 +251,26 @@ export default function AdjustmentPaymentPage() {
     }
     
     return (
-        <main className="min-h-screen bg-background px-6 py-13">
-            <div className="mx-auto h-[680px] max-w-5xl overflow-hidden rounded-3xl bg-white shadow-lg">
-                <div className="grid h-full md:grid-cols-2">
+        <main className="min-h-screen bg-background px-4 py-6 sm:px-6 sm:py-10 lg:py-13">
+            <div className="mx-auto w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-lg md:h-[680px]">
+                <div className="grid md:h-full md:grid-cols-2">
 
                     {/* LEFT SIDE - ADJUSTMENT SUMMARY */}
-                    <section className="h-full p-12 mt-6">
+                    <section className="h-full p-5 sm:p-8 md:p-10 lg:p-12 md:mt-6">
                         <div className="border-b border-gray-200 pb-5">
                             <h1 className="text-2xl font-bold text-gray-900">
                                 Additional Payment
                             </h1>
 
-                            <p className="mt-2 text-sm text-gray-500">
+                            <p className="mt-2 shrink-0 text-sm text-gray-500">
                                 Complete the additional payment to confirm your
                                 booking changes.
                             </p>
                         </div>
 
                         <div className="mt-6 space-y-4">
-                            <div>
-                                <p className="text-sm text-gray-500">
+                            <div className="flex items-start justify-between gap-4 md:block">
+                                <p className="shrink-0 text-sm text-gray-500">
                                     Booking Code
                                 </p>
                                 <p className="font-semibold text-gray-900">
@@ -278,8 +278,8 @@ export default function AdjustmentPaymentPage() {
                                 </p>
                             </div>
 
-                            <div>
-                                <p className="text-sm text-gray-500">
+                            <div className="flex items-start justify-between gap-4 md:block">
+                                <p className="shrink-0 text-sm text-gray-500">
                                     New Charging Time
                                 </p>
                                 <p className="font-semibold text-gray-900">
@@ -289,8 +289,8 @@ export default function AdjustmentPaymentPage() {
                                 </p>
                             </div>
 
-                            <div>
-                                <p className="text-sm text-gray-500">
+                            <div className="flex items-start justify-between gap-4 md:block">
+                                <p className="shrink-0 text-sm text-gray-500">
                                     New Estimated Energy
                                 </p>
                                 <p className="font-semibold text-gray-900">
@@ -299,12 +299,12 @@ export default function AdjustmentPaymentPage() {
                             </div>
 
                             <div className="rounded-xl bg-gray-50 p-4">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">
+                                <div className="flex items-start justify-between gap-4">
+                                    <span className="text-sm sm:text-base text-gray-600">
                                         Previous Payment
                                     </span>
 
-                                    <span className="font-medium text-gray-900">
+                                    <span className="shrink-0 text-right font-medium text-gray-900">
                                         Rp{" "}
                                         {(
                                         adjustment.estimatedCost -
@@ -313,12 +313,12 @@ export default function AdjustmentPaymentPage() {
                                     </span>
                                 </div>
 
-                                <div className="mt-3 flex justify-between">
-                                    <span className="text-gray-600">
+                                <div className="flex items-start justify-between gap-4">
+                                    <span className="text-sm sm:text-base text-gray-600">
                                         New Booking Cost
                                     </span>
 
-                                    <span className="font-medium text-gray-900">
+                                    <span className="shrink-0 text-right font-medium text-gray-900">
                                         Rp{" "}
                                         {adjustment.estimatedCost.toLocaleString(
                                         "id-ID"
@@ -328,12 +328,12 @@ export default function AdjustmentPaymentPage() {
 
                                 <div className="my-4 border-t border-gray-200" />
 
-                                <div className="flex items-center justify-between">
-                                    <span className="font-semibold text-gray-900">
+                                <div className="flex items-start justify-between gap-4">
+                                    <span className="text-sm sm:text-base text-gray-600">
                                         Additional Payment
                                     </span>
 
-                                    <span className="text-xl font-bold text-green-700">
+                                    <span className="shrink-0 text-right font-medium text-green-700">
                                         Rp{" "}
                                         {adjustment.adjustmentAmount.toLocaleString(
                                         "id-ID"
@@ -342,8 +342,8 @@ export default function AdjustmentPaymentPage() {
                                 </div>
                             </div>
 
-                            <div>
-                                <p className="text-sm text-gray-500">
+                            <div className="flex flex-col items-center md:items-baseline">
+                                <p className="shrink-0 text-sm text-gray-500">
                                     Payment Status
                                 </p>
 
@@ -355,14 +355,14 @@ export default function AdjustmentPaymentPage() {
                     </section>
 
                     {/* RIGHT SIDE - PAYMENT FORM */}
-                    <section className="hide-scrollbar h-full overflow-hidden border-t border-border-soft bg-[#f8fffb] p-8 md:border-l md:border-t-0 md:px-12 py-6">
-                        <div className="hide-scrollbar h-full overflow-y-auto p-8 md:p-12">
-                            <h2 className="text-2xl font-bold text-primary-green">
+                    <section className="hide-scrollbar h-full border-t border-border-soft bg-[#f8fffb] md:overflow-hidden md:border-l md:border-t-0">
+                        <div className="hide-scrollbar h-full p-5 sm:p-8 md:overflow-y-auto md:p-10 lg:p-12">
+                            <h2 className="text-2xl font-bold text-primary-green text-center sm:text-start">
                             Payment Method
                             </h2>
 
                             {/* PAYMENT METHOD SELECTOR */}
-                            <div className="mt-6 flex gap-8">
+                            <div className="mt-6 flex gap-8 justify-center sm:justify-start">
                                 <label className="flex cursor-pointer items-center gap-2">
                                     <input
                                     type="radio"
@@ -438,7 +438,7 @@ export default function AdjustmentPaymentPage() {
                                             </div>
 
                                             {/* EXPIRY + CVC */}
-                                            <div className="grid grid-cols-2 gap-5">
+                                            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                                                 <div>
                                                     <label className="text-sm font-medium">
                                                     Expiry Date

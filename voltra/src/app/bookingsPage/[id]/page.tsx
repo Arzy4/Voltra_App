@@ -103,6 +103,10 @@ export default function BookingDetailPage() {
   const [editDuration, setEditDuration] =
     useState<number>(60);
 
+  const [isCancelling, setIsCancelling] = useState(false);
+
+  const [showCancelModal, setShowCancelModal] = useState(false);
+
   const [modal, setModal] = useState({
       open: false,
       type: "success" as "success" | "error",
@@ -122,64 +126,6 @@ export default function BookingDetailPage() {
           message,
       });
   };
-
-  useEffect(() => {
-    const fetchBooking = async () => {
-      if (!bookingId || !/^\d+$/.test(bookingId)) {
-        console.error("Invalid booking ID:", bookingId);
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const response = await apiFetch(
-          `/bookings/${bookingId}`
-        );
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            result.message ||
-              "Failed to fetch booking details."
-          );
-        }
-
-        setBooking(result.data);
-      } catch (error) {
-        console.error(
-          "Failed to fetch booking details:",
-          error
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchBooking();
-  }, [bookingId]);
-
-  useEffect(() => {
-    const fetchStations = async () => {
-      try {
-        const response = await apiFetch("/stations");
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            result.message || "Failed to retrieve stations."
-          );
-        }
-
-        setStations(result.data ?? []);
-      } catch (error) {
-        console.error("Failed to retrieve stations:", error);
-        setStations([]);
-      }
-    };
-
-    fetchStations();
-  }, []);
 
   const handleSaveChanges = async () => {
     if (
@@ -259,6 +205,121 @@ export default function BookingDetailPage() {
       setIsSaving(false);
     }
   };
+
+  const handleCancelBooking = async () => {
+    if (!booking) return;
+
+    try {
+      setIsCancelling(true);
+
+      const response = await apiFetch(`/bookings/${booking.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: "CANCELLED",
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message || "Failed to cancel booking."
+        );
+      }
+
+      setBooking((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: "CANCELLED",
+            }
+          : prev
+      );
+
+      setShowCancelModal(false);
+
+      showModal(
+        "success",
+        "Booking Cancelled",
+        `Booking ${booking.bookingCode} has been cancelled successfully.`
+      );
+    } catch (error) {
+      const message =error instanceof Error
+        ? error.message
+        : "Failed to cancel booking.";
+
+      setShowCancelModal(false);
+
+      showModal(
+        "error",
+        "Cancellation Failed",
+        message
+      );
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchBooking = async () => {
+      if (!bookingId || !/^\d+$/.test(bookingId)) {
+        console.error("Invalid booking ID:", bookingId);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await apiFetch(
+          `/bookings/${bookingId}`
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            result.message ||
+              "Failed to fetch booking details."
+          );
+        }
+
+        setBooking(result.data);
+      } catch (error) {
+        console.error(
+          "Failed to fetch booking details:",
+          error
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBooking();
+  }, [bookingId]);
+
+  useEffect(() => {
+    const fetchStations = async () => {
+      try {
+        const response = await apiFetch("/stations");
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            result.message || "Failed to retrieve stations."
+          );
+        }
+
+        setStations(result.data ?? []);
+      } catch (error) {
+        console.error("Failed to retrieve stations:", error);
+        setStations([]);
+      }
+    };
+
+    fetchStations();
+  }, []);
 
   if (isLoading) {
     return (
@@ -383,22 +444,22 @@ export default function BookingDetailPage() {
         </div>
 
         {/* BOOKING HEADER */}
-        <div className="mt-8 flex items-center justify-center gap-[265px]">
-          <div>
+        <div className="mx-auto mt-6 sm:mt-8 flex max-w-3xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
             <p className="text-sm opacity-80">
               Booking Details
             </p>
 
-            <h1 className="mt-1 text-2xl font-bold">
+            <h1 className="mt-1 break-words text-xl sm:text-2xl font-bold">
               {booking.bookingCode}
             </h1>
 
-            <p className="mt-4 text-sm opacity-90">
+            <p className="mt-3 sm:mt-4 text-sm opacity-90">
               Your charging reservation details and payment information.
             </p>
           </div>
 
-          <span className="rounded-full bg-white px-4 py-1 text-lg font-semibold text-primary-green">
+          <span className="w-fit shrink-0 self-center sm:self-auto rounded-full bg-white px-4 py-1 text-sm sm:text-lg font-semibold text-primary-green">
             {booking.status}
           </span>
         </div>
@@ -418,11 +479,7 @@ export default function BookingDetailPage() {
             </p>
 
             <p className="mt-1 text-sm text-text-secondary">
-              {booking.slot.station.location}
-            </p>
-
-            <p className="mt-1 text-sm text-text-secondary">
-              {booking.slot.station.address}
+              {booking.slot.station.location}, {booking.slot.station.address}
             </p>
           </div>
         </div>
@@ -604,6 +661,17 @@ export default function BookingDetailPage() {
             </button>
           ) : null}
         </div>
+
+        {booking && ["PENDING", "CONFIRMED", "ONGOING"].includes(booking.status) && (
+          <button
+            type="button"
+            onClick={() => setShowCancelModal(true)}
+            disabled={isCancelling}
+            className="mt-3 w-full rounded-xl border bg-red-500 px-6 py-3 font-semibold text-red-900 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Cancel Booking
+          </button>
+        )}
       </section>
 
       {/* UPDATE BOOKING MODAL */}
@@ -966,53 +1034,96 @@ export default function BookingDetailPage() {
 
       {/* AFTER CONFIRMATION MODAL */}
       {modal.open && (
-      <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 px-4">
-        <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
 
-          <div
-            className={`mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full ${
-              modal.type === "success"
-                ? "bg-green-100 text-green-600"
-                : "bg-red-100 text-red-600"
-            }`}
-          >
-            <span className="text-2xl">
-              {modal.type === "success" ? "✓" : "✕"}
-            </span>
+            <div
+              className={`mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full ${
+                modal.type === "success"
+                  ? "bg-green-100 text-green-600"
+                  : "bg-red-100 text-red-600"
+              }`}
+            >
+              <span className="text-2xl">
+                {modal.type === "success" ? "✓" : "✕"}
+              </span>
+            </div>
+
+            <h2 className="text-center text-2xl font-bold text-gray-900">
+              {modal.title}
+            </h2>
+
+            <p className="mt-3 text-center text-gray-600">
+              {modal.message}
+            </p>
+
+            <button
+              type="button"
+              onClick={() => {
+                setModal((prev) => ({
+                  ...prev,
+                  open: false,
+                }));
+
+                if (modal.type === "success") {
+                  window.location.reload();
+                }
+              }}
+              className={`mt-7 w-full cursor-pointer rounded-xl px-4 py-3 font-semibold text-white duration-300 ${
+                modal.type === "success"
+                  ? "bg-primary-green hover:opacity-90"
+                  : "bg-red-500 hover:bg-red-600"
+              }`}
+            >
+              {modal.type === "success" ? "Done" : "Try Again"}
+            </button>
+
           </div>
-
-          <h2 className="text-center text-2xl font-bold text-gray-900">
-            {modal.title}
-          </h2>
-
-          <p className="mt-3 text-center text-gray-600">
-            {modal.message}
-          </p>
-
-          <button
-            type="button"
-            onClick={() => {
-              setModal((prev) => ({
-                ...prev,
-                open: false,
-              }));
-
-              if (modal.type === "success") {
-                window.location.reload();
-              }
-            }}
-            className={`mt-7 w-full cursor-pointer rounded-xl px-4 py-3 font-semibold text-white duration-300 ${
-              modal.type === "success"
-                ? "bg-primary-green hover:opacity-90"
-                : "bg-red-500 hover:bg-red-600"
-            }`}
-          >
-            {modal.type === "success" ? "Done" : "Try Again"}
-          </button>
-
         </div>
-      </div>
-    )}
+      )}
+
+      {/* CANCEL BOOKING CONFIRMATION */}
+      {showCancelModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <h2 className="text-xl font-bold text-gray-900">
+              Cancel Booking
+            </h2>
+
+            <p className="mt-2 text-sm leading-6 text-gray-500">
+              Are you sure you want to cancel booking{" "}
+              <span className="font-semibold text-gray-900">
+                {booking.bookingCode}
+              </span>
+              ?
+            </p>
+
+            <p className="mt-3 text-sm text-red-500">
+              This action will mark your booking as cancelled.
+            </p>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowCancelModal(false)}
+                disabled={isCancelling}
+                className="cursor-pointer rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+              >
+                Keep Booking
+              </button>
+
+              <button
+                type="button"
+                onClick={handleCancelBooking}
+                disabled={isCancelling}
+                className="cursor-pointer rounded-xl bg-red-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isCancelling ? "Cancelling..." : "Yes, Cancel"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       
       <Footer />
       </>

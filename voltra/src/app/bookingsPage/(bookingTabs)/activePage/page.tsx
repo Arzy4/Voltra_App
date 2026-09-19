@@ -92,20 +92,20 @@ export default function ActivePage() {
             {activeBookings.map((booking) => (
               <div
                 key={booking.id}
-                className="rounded-2xl bg-white p-6 shadow-sm"
+                className="rounded-2xl bg-white p-4 shadow-sm sm:p-6"
               >
                 <div className="flex items-start justify-between gap-4">
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <p className="text-sm text-text-secondary">
                       Booking Code
                     </p>
 
-                    <h2 className="text-xl font-bold">
+                    <h2 className="whitespace-nowrap  text-base font-bold sm:text-xl">
                       {booking.bookingCode}
                     </h2>
                   </div>
 
-                  <span className="rounded-full bg-[#c2f3db] px-4 py-1 text-sm font-semibold text-primary-green">
+                  <span className="shrink-0 rounded-full bg-[#c2f3db] px-3 py-1 text-xs font-semibold text-primary-green sm:px-4 sm:text-sm">
                     {booking.status}
                   </span>
                 </div>

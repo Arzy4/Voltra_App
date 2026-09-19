@@ -190,7 +190,7 @@ export default function TransactionDetailPage() {
         : payment.status;
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10">
+    <main className="min-h-screen bg-background px-4 py-6 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-3xl">
         <button
           type="button"
@@ -200,21 +200,21 @@ export default function TransactionDetailPage() {
           ← Back to Payment History
         </button>
 
-        <div className="rounded-3xl bg-white p-8 shadow-lg md:p-10">
+        <div className="rounded-2xl bg-white p-5 shadow-lg sm:rounded-3xl sm:p-8 md:p-10">
             {/* HEADER */}
-            <div className="flex items-start justify-between gap-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
                 <div>
-                <h1 className="text-4xl font-bold text-primary-green">
+                <h1 className="text-2xl font-bold text-primary-green sm:text-3xl md:text-4xl text-center sm:text-left">
                     Transaction Details
                 </h1>
 
-                <p className="mt-2 text-text-secondary">
+                <p className="mt-2 text-text-secondary text-center sm:text-left">
                     Here&apos;s the detailed information about your payment transaction.
                 </p>
                 </div>
 
                 <span
-                className={`rounded-full px-5 py-2 text-sm font-bold ${
+                className={`w-fit shrink-0 rounded-full px-4 py-2 text-sm font-bold self-center ${
                     payment.status === "PAID" || payment.status === "COMPLETED"
                     ? "bg-emerald-100 text-emerald-700"
                     : payment.status === "PENDING"
@@ -229,7 +229,7 @@ export default function TransactionDetailPage() {
             </div>
 
             {/* PAYMENT RESULT */}
-            <div className="mt-8 rounded-2xl border border-primary-green/20 bg-[#eefbf4] p-8 text-center">
+            <div className="mt-6 sm:mt-8 rounded-2xl border border-primary-green/20 bg-[#eefbf4] p-5 sm:p-8 text-center">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary-green text-3xl font-bold text-white">
                 {displayStatus === "PAID" ||
                 displayStatus === "REFUNDED"
@@ -241,7 +241,7 @@ export default function TransactionDetailPage() {
                   {transactionLabel}
                 </p>
 
-                <p className="mt-3 text-4xl font-bold">
+                <p className="mt-3 break-words text-2xl sm:text-3xl md:text-4xl font-bold">
                   {payment.type === "REFUND" ? "- " : ""}
                   Rp {transactionAmount.toLocaleString("id-ID")}
                 </p>
@@ -250,7 +250,7 @@ export default function TransactionDetailPage() {
                 Transaction ID
                 </p>
 
-                <p className="mt-1 font-semibold">
+                <p className="mt-1 break-all text-sm sm:text-base font-semibold">
                 {payment.transactionId ?? "-"}
                 </p>
 
@@ -272,44 +272,44 @@ export default function TransactionDetailPage() {
                 </h2>
 
                 <div className="mt-5 space-y-4">
-                    <div className="flex gap-4 justify-between">
-                        <span className="text-text-secondary">
+                    <div className="flex items-start gap-4">
+                        <span className="w-[95px] shrink-0 text-text-secondary sm:w-[140px]">
                         Payment ID
                         </span>
 
-                        <span className="font-semibold">
+                        <span className="min-w-0 flex-1 break-words text-right font-semibold">
                         #{payment.id}
                         </span>
                     </div>
 
-                    <div className="flex gap-4 justify-between">
-                        <span className="text-text-secondary">
+                    <div className="flex items-start gap-4">
+                        <span className="w-[95px] shrink-0 text-text-secondary sm:w-[140px]">
                         Transaction ID
                         </span>
 
-                        <span className="font-semibold">
+                        <span className="min-w-0 flex-1 break-words text-right font-semibold">
                         {payment.transactionId ?? "-"}
                         </span>
                     </div>
 
-                    <div className="flex gap-4 justify-between">
-                        <span className="text-text-secondary">
+                    <div className="flex items-start gap-4">
+                        <span className="w-[95px] shrink-0 text-text-secondary sm:w-[140px]">
                         Payment Method
                         </span>
 
-                        <span className="font-semibold">
+                        <span className="min-w-0 flex-1 break-words text-right font-semibold">
                         {payment.paymentMethod === "CARD"
                             ? "Card"
                             : "E-Wallet"}
                         </span>
                     </div>
 
-                    <div className="flex gap-4 justify-between">
-                        <span className="text-text-secondary">
+                    <div className="flex items-start gap-4">
+                        <span className="w-[95px] shrink-0 text-text-secondary sm:w-[140px]">
                         Transaction Date
                         </span>
 
-                        <span className="font-semibold">
+                        <span className="min-w-0 flex-1 break-words text-right font-semibold">
                         {new Date(payment.createdAt).toLocaleString("en-GB", {
                             day: "2-digit",
                             month: "long",
@@ -329,42 +329,42 @@ export default function TransactionDetailPage() {
                 </h2>
 
                 <div className="mt-5 space-y-4">
-                    <div className="flex gap-4 justify-between">
-                    <span className="text-text-secondary">
+                    <div className="flex items-start gap-4">
+                    <span className="w-[95px] shrink-0 text-text-secondary sm:w-[140px]">
                         Booking Code
                     </span>
 
-                    <span className="font-semibold">
+                    <span className="min-w-0 flex-1 break-words text-right font-semibold">
                         {payment.booking.bookingCode}
                     </span>
                     </div>
 
-                    <div className="flex gap-4 justify-between">
-                    <span className="text-text-secondary">
+                    <div className="flex items-start gap-4">
+                    <span className="w-[95px] shrink-0 text-text-secondary sm:w-[140px]">
                         Station
                     </span>
 
-                    <span className="font-semibold">
+                    <span className="min-w-0 flex-1 break-words text-right font-semibold">
                         {payment.booking.slot.station.name}
                     </span>
                     </div>
 
-                    <div className="flex gap-4 justify-between">
-                    <span className="text-text-secondary">
+                    <div className="flex items-start gap-4">
+                    <span className="w-[95px] shrink-0 text-text-secondary sm:w-[140px]">
                         Charging Slot
                     </span>
 
-                    <span className="font-semibold">
+                    <span className="min-w-0 flex-1 break-words text-right font-semibold">
                         {payment.booking.slot.slotCode}
                     </span>
                     </div>
 
-                    <div className="flex gap-4 justify-between">
-                    <span className="text-text-secondary">
+                    <div className="flex items-start gap-4">
+                    <span className="w-[95px] shrink-0 text-text-secondary sm:w-[140px]">
                         Charger Type
                     </span>
 
-                    <span className="font-semibold">
+                    <span className="min-w-0 flex-1 break-words text-right font-semibold">
                         {payment.booking.slot.chargerType.charAt(0) +
                         payment.booking.slot.chargerType
                             .slice(1)
@@ -373,12 +373,12 @@ export default function TransactionDetailPage() {
                     </span>
                     </div>
 
-                    <div className="flex gap-4 justify-between">
-                    <span className="text-text-secondary">
+                    <div className="flex items-start gap-4">
+                    <span className="w-[95px] shrink-0 text-text-secondary sm:w-[140px]">
                         Estimated Energy
                     </span>
 
-                    <span className="font-semibold">
+                    <span className="min-w-0 flex-1 break-words text-right font-semibold">
                         {payment.booking.estimatedKwh ?? "-"} kWh
                     </span>
                     </div>
