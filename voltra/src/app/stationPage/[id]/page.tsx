@@ -181,15 +181,15 @@ export default async function StationDetailPage({
                         Back to Stations
                     </Link>
 
-                    <h1 className="text-3xl sm:text-4xl font-bold leading-tight text-center">
+                    <h1 className="text-3xl sm:text-4xl font-bold leading-tight text-center md:text-left">
                         {station.name}
                     </h1>
 
-                    <p className="mt-2 text-base sm:text-lg leading-relaxed text-center">
+                    <p className="mt-2 text-base sm:text-lg leading-relaxed text-center md:text-left">
                         {station.location}, {station.address}
                     </p>
 
-                    <div className="mt-6 text-center">
+                    <div className="mt-6 text-center md:text-left">
                     <span
                         className={`inline-flex items-center justify-center rounded-full px-5 py-2.5 sm:px-6 sm:py-3 text-sm sm:text-base font-semibold ${
                         statusStyles[displayStatus]
@@ -202,7 +202,7 @@ export default async function StationDetailPage({
 
                 {/* RIGHT - Charging Availability */}
                 <div>
-                    <h2 className="py-4 sm:pt-4 text-2xl sm:text-3xl font-bold text-center">
+                    <h2 className="py-4 sm:pt-4 text-2xl sm:text-3xl font-bold text-center md:text-left">
                     Charging Availability
                     </h2>
 
@@ -244,7 +244,7 @@ export default async function StationDetailPage({
                 </section>
 
             <section className="mt-10 sm:mt-14">
-                <h2 className="mb-5 sm:mb-6 text-2xl sm:text-3xl font-bold text-center">
+                <h2 className="mb-5 sm:mb-6 text-2xl sm:text-3xl font-bold text-center md:text-left">
                     Charging Options
                 </h2>
 
