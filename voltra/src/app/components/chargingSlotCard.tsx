@@ -3,12 +3,18 @@
 import { useState } from "react";
 
 type ChargingSlotCardProps = {
-  slotCode: string;
+  slotCode?: string;
   type: string;
-  power: number;
-  pricePerKwh: number;
+  power?: number;
+  pricePerKwh?: number;
+
+  isPresetBooking?: boolean;
+  vehicleName?: string;
+  initialDurationMinutes?: number;
+
   onBack: () => void;
   onClose: () => void;
+
   onContinue: (
     selectedDate: string,
     startTime: string,
@@ -21,6 +27,9 @@ export default function ChargingSlotCard({
   type,
   power,
   pricePerKwh,
+  isPresetBooking = false,
+  vehicleName,
+  initialDurationMinutes,
   onBack,
   onClose,
   onContinue,
@@ -28,7 +37,7 @@ export default function ChargingSlotCard({
   const [selectedDate, setSelectedDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [durationMinutes, setDurationMinutes] =
-    useState<number | null>(null);
+    useState<number | null>(initialDurationMinutes ?? null);
 
   const durationOptions = [
     { label: "30 min", value: 30 },
@@ -60,24 +69,55 @@ export default function ChargingSlotCard({
             className="mb-4 sm:mb-5 inline-flex items-center gap-1 text-sm sm:text-base font-semibold text-primary-green hover:underline"
           >
             <span className="shrink-0">←</span>
-            <span>Back to Charging Slots</span>
+            <span>
+              {isPresetBooking
+                ? "Back to Vehicle Presets"
+                : "Back to Charging Slots"}
+            </span>
           </button>
 
-          <p className="font-semibold text-primary-green">
-            CHARGING SLOT
-          </p>
+          {isPresetBooking ? (
+            <>
+              <p className="font-semibold text-primary-green">
+                VEHICLE PRESET
+              </p>
 
-          <h2 className="mt-1 text-4xl font-bold">
-            {slotCode}
-          </h2>
+              <h2 className="mt-1 text-4xl font-bold">
+                {vehicleName}
+              </h2>
 
-          <p className="mt-2 text-text-secondary">
-            {type} Charging · {power} kW
-          </p>
+              <p className="mt-2 text-text-secondary">
+                {type.charAt(0).toUpperCase() +
+                  type.slice(1).toLowerCase()}{" "}
+                Charging
+                {power !== undefined && ` · ${power} kW`}
+              </p>
 
-          <p className="mt-1 font-semibold">
-            Rp {pricePerKwh.toLocaleString("id-ID")} / kWh
-          </p>
+              {pricePerKwh !== undefined && (
+                <p className="mt-1 font-semibold">
+                  Rp {pricePerKwh.toLocaleString("id-ID")} / kWh
+                </p>
+              )}
+            </>
+          ) : (
+            <>
+              <p className="font-semibold text-primary-green">
+                CHARGING SLOT
+              </p>
+
+              <h2 className="mt-1 text-4xl font-bold">
+                {slotCode}
+              </h2>
+
+              <p className="mt-2 text-text-secondary">
+                {type} Charging · {power} kW
+              </p>
+
+              <p className="mt-1 font-semibold">
+                Rp {pricePerKwh?.toLocaleString("id-ID")} / kWh
+              </p>
+            </>
+          )}
         </div>
 
         <button
