@@ -1,26 +1,32 @@
-const chargingTypes = [
-  {
-    type: "FAST",
-    bookings: 120,
-    revenue: "Rp 18.5M",
-  },
-  {
-    type: "NORMAL",
-    bookings: 85,
-    revenue: "Rp 10.2M",
-  },
-  {
-    type: "ULTRA",
-    bookings: 52,
-    revenue: "Rp 8.75M",
-  },
-];
+interface ChargingTypePerformanceData {
+  id: number;
+  type: "NORMAL" | "FAST" | "ULTRA";
+  bookings: number;
+  revenue: number;
+}
 
-export default function ChargingTypePerformance() {
-  const totalBookings = chargingTypes.reduce(
+interface ChargingTypePerformanceProps {
+  data: ChargingTypePerformanceData[];
+}
+
+export default function ChargingTypePerformance({
+  data,
+}: ChargingTypePerformanceProps) {
+  const totalBookings = data.reduce(
     (total, charger) => total + charger.bookings,
-    0
+    0,
   );
+
+  const totalRevenue = data.reduce(
+    (total, charger) => total + charger.revenue,
+    0,
+  );
+
+  const formatRevenue = (revenue: number) => {
+    const millions = revenue / 1_000_000;
+
+    return `Rp ${parseFloat(millions.toFixed(2))}M`;
+  };
 
   return (
     <div className="flex h-full flex-col rounded-2xl bg-white p-5 shadow-sm">
@@ -44,9 +50,9 @@ export default function ChargingTypePerformance() {
         </div>
 
         <div>
-          {chargingTypes.map((charger) => (
+          {data.map((charger) => (
             <div
-              key={charger.type}
+              key={charger.id}
               className="grid grid-cols-[1fr_80px_120px] items-center gap-3 border-b border-gray-100 py-4"
             >
               <span className="text-sm font-semibold text-gray-800">
@@ -58,7 +64,7 @@ export default function ChargingTypePerformance() {
               </span>
 
               <span className="text-right text-sm font-semibold text-primary-green">
-                {charger.revenue}
+                {formatRevenue(charger.revenue)}
               </span>
             </div>
           ))}
@@ -76,7 +82,7 @@ export default function ChargingTypePerformance() {
         </span>
 
         <span className="text-right text-sm font-bold text-primary-green">
-          Rp 37.45M
+          {formatRevenue(totalRevenue)}
         </span>
       </div>
     </div>

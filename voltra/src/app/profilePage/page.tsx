@@ -15,6 +15,18 @@ type User = {
   role: "USER" | "ADMIN";
 };
 
+type Vehicle = {
+  id: number;
+  userId: number;
+  vehicleName: string;
+  brand: string;
+  model: string;
+  preferredChargerType: "NORMAL" | "FAST" | "ULTRA";
+  defaultChargingDuration: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 type PaymentHistoryItem = {
   id: string;
   bookingId: number;
@@ -54,6 +66,33 @@ export default function ProfilePage() {
     phoneNumber: "",
   });
 
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [isVehiclesLoading, setIsVehiclesLoading] = useState(false);
+  const [isAddVehicleOpen, setIsAddVehicleOpen] = useState(false);
+  const [isAddingVehicle, setIsAddingVehicle] = useState(false);
+  const [isDeleteVehicleOpen, setIsDeleteVehicleOpen] = useState(false);
+  const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
+  const [isDeletingVehicle, setIsDeletingVehicle] = useState(false);
+  const [isUpdateVehicleOpen, setIsUpdateVehicleOpen] = useState(false);
+  const [vehicleToUpdate, setVehicleToUpdate] = useState<Vehicle | null>(null);
+  const [isUpdatingVehicle, setIsUpdatingVehicle] = useState(false);
+
+  const [vehicleForm, setVehicleForm,] = useState({
+    vehicleName: "",
+    brand: "",
+    model: "",
+    preferredChargerType: "NORMAL" as "NORMAL" | "FAST" | "ULTRA",
+    defaultChargingDuration: "60"
+  });
+
+    const [updateVehicleForm, setUpdateVehicleForm] = useState({
+    vehicleName: "",
+    brand: "",
+    model: "",
+    preferredChargerType: "NORMAL" as "NORMAL" | "FAST" | "ULTRA",
+    defaultChargingDuration: "60",
+  });
+
   const [payments, setPayments] = useState<PaymentHistoryItem[]>([]);
   const [isPaymentsLoading, setIsPaymentsLoading] = useState(false);
 
@@ -72,6 +111,7 @@ export default function ProfilePage() {
 
   const [activeSection, setActiveSection] = useState<
     | "account"
+    | "vehicle"
     | "paymentHistory"
     | "paymentMethods"
     | "security"
@@ -160,6 +200,219 @@ export default function ProfilePage() {
 
     fetchPayments();
   }, [activeSection]);
+
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      if (activeSection !== "vehicle") return;
+
+      try {
+        setIsVehiclesLoading(true);
+
+        const response = await apiFetch("/vehicles");
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            result.message || "Failed to retrieve vehicles."
+          );
+        }
+
+        setVehicles(result.data ?? []);
+      } catch (error) {
+        console.error("Failed to retrieve vehicles:", error);
+        setVehicles([]);
+      } finally {
+        setIsVehiclesLoading(false);
+      }
+    };
+
+    fetchVehicles();
+  }, [activeSection]);
+
+  async function handleAddVehicle() {
+    if (
+      !vehicleForm.vehicleName.trim() ||
+      !vehicleForm.brand.trim() ||
+      !vehicleForm.model.trim()
+    ) {
+      alert("Please fill in all vehicle fields.");
+      return;
+    }
+
+    try {
+      setIsAddingVehicle(true);
+
+      const response = await apiFetch("/vehicles", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          vehicleName: vehicleForm.vehicleName.trim(),
+          brand: vehicleForm.brand.trim(),
+          model: vehicleForm.model.trim(),
+          preferredChargerType: vehicleForm.preferredChargerType,
+          defaultChargingDuration: Number(
+            vehicleForm.defaultChargingDuration
+          ),
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          Array.isArray(result.message)
+            ? result.message.join(", ")
+            : result.message || "Failed to add vehicle."
+        );
+      }
+
+      // Add the newly created vehicle to the UI
+      setVehicles((prev) => [
+        result.data,
+        ...prev,
+      ]);
+
+      // Reset the form
+      setVehicleForm({
+        vehicleName: "",
+        brand: "",
+        model: "",
+        preferredChargerType: "NORMAL",
+        defaultChargingDuration: "60",
+      });
+
+      // Close modal
+      setIsAddVehicleOpen(false);
+
+    } catch (error) {
+      console.error("Failed to add vehicle:", error);
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to add vehicle."
+      );
+    } finally {
+      setIsAddingVehicle(false);
+    }
+  }
+
+  async function handleUpdateVehicle() {
+    if (!vehicleToUpdate) return;
+
+    if (
+      !updateVehicleForm.vehicleName.trim() ||
+      !updateVehicleForm.brand.trim() ||
+      !updateVehicleForm.model.trim()
+    ) {
+      alert("Please fill in all vehicle fields.");
+      return;
+    }
+
+    try {
+      setIsUpdatingVehicle(true);
+
+      const response = await apiFetch(
+        `/vehicles/${vehicleToUpdate.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            vehicleName: updateVehicleForm.vehicleName.trim(),
+            brand: updateVehicleForm.brand.trim(),
+            model: updateVehicleForm.model.trim(),
+            preferredChargerType:
+              updateVehicleForm.preferredChargerType,
+            defaultChargingDuration: Number(
+              updateVehicleForm.defaultChargingDuration
+            ),
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          Array.isArray(result.message)
+            ? result.message.join(", ")
+            : result.message || "Failed to update vehicle."
+        );
+      }
+
+      setVehicles((prev) =>
+        prev.map((vehicle) =>
+          vehicle.id === vehicleToUpdate.id
+            ? result.data
+            : vehicle
+        )
+      );
+
+      setIsUpdateVehicleOpen(false);
+      setVehicleToUpdate(null);
+    } catch (error) {
+      console.error("Failed to update vehicle:", error);
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to update vehicle."
+      );
+    } finally {
+      setIsUpdatingVehicle(false);
+    }
+}
+
+  async function handleDeleteVehicle() {
+    if (!vehicleToDelete) return;
+
+    try {
+      setIsDeletingVehicle(true);
+
+      const response = await apiFetch(
+        `/vehicles/${vehicleToDelete.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          Array.isArray(result.message)
+            ? result.message.join(", ")
+            : result.message || "Failed to delete vehicle."
+        );
+      }
+
+      // Remove the deleted vehicle from the UI
+      setVehicles((prev) =>
+        prev.filter(
+          (vehicle) => vehicle.id !== vehicleToDelete.id
+        )
+      );
+
+      // Close modal
+      setIsDeleteVehicleOpen(false);
+      setVehicleToDelete(null);
+
+    } catch (error) {
+      console.error("Failed to delete vehicle:", error);
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to delete vehicle."
+      );
+    } finally {
+      setIsDeletingVehicle(false);
+    }
+}
 
   function handleLogout() {
     setModal({
@@ -345,7 +598,7 @@ export default function ProfilePage() {
 
         <div className="grid grid-cols-1 gap-6 md:h-[600px] md:grid-cols-[260px_1fr] md:gap-8">
           {/* LEFT SIDEBAR */}
-          <aside className="rounded-2xl bg-white px-4 sm:px-5 py-6 md:h-full md:overflow-hidden md:py-10 shadow-sm">
+          <aside className="flex rounded-2xl bg-white px-4 sm:px-5 py-6 md:h-full md:flex-col md:overflow-hidden md:py-10 shadow-sm">
             <div className="border-b border-border-soft pb-4 md:pb-6 text-center">
               <Image
                 src="/avatar_placeholder.png"
@@ -364,7 +617,7 @@ export default function ProfilePage() {
               </p>
             </div>
 
-            <nav className="hide-scrollbar mt-4 flex gap-2 overflow-x-auto pb-2 md:mt-6 md:block md:overflow-visible md:pb-0">
+            <nav className="hide-scrollbar mt-4 flex gap-2 overflow-x-auto pb-2 md:mt-6 md:block md:min-h-0 md:flex-1 md:overflow-y-auto md:overflow-x-hidden md:pb-0">
               <button
                 onClick={() => setActiveSection("account")}
                 className={`w-full rounded-lg border-l-4 px-3 py-3 text-center text-sm transition md:px-4 md:text-base md:text-left ${
@@ -376,58 +629,39 @@ export default function ProfilePage() {
                 Account Information
               </button>
 
-              {currentUser?.role === "ADMIN" && (
-                <>
-                  <button
-                    onClick={() => setActiveSection("manageStations")}
-                    className={`w-full rounded-lg border-l-4 px-4 py-3 text-left transition ${
-                      activeSection === "manageStations"
-                        ? "border-primary-green bg-[#c2f3db] font-semibold text-primary-green"
-                        : "border-transparent hover:bg-gray-50"
-                    }`}
-                  >
-                    Manage Stations
-                  </button>
+              <button
+                onClick={() => setActiveSection("vehicle")}
+                className={`w-full rounded-lg border-l-4 px-3 py-3 text-center text-sm transition md:px-4 md:text-base md:text-left ${
+                  activeSection === "vehicle"
+                    ? "border-primary-green bg-[#c2f3db] font-semibold text-primary-green"
+                    : "border-transparent hover:bg-gray-50"
+                }`}
+              >
+                Vehicle Information
+              </button>
 
-                  <button
-                    onClick={() => setActiveSection("manageSlots")}
-                    className={`w-full rounded-lg border-l-4 px-4 py-3 text-left transition ${
-                      activeSection === "manageSlots"
-                        ? "border-primary-green bg-[#c2f3db] font-semibold text-primary-green"
-                        : "border-transparent hover:bg-gray-50"
-                    }`}
-                  >
-                    Manage Charging Slots
-                  </button>
-                </>
-              )}
+              <button
+                onClick={() => setActiveSection("paymentHistory")}
+                className={`w-full rounded-lg border-l-4 px-4 py-3 text-left transition ${
+                  activeSection === "paymentHistory"
+                    ? "border-primary-green bg-[#c2f3db] font-semibold text-primary-green"
+                    : "border-transparent hover:bg-gray-50"
+                }`}
+              >
+                Payment History
+              </button>
 
-              {currentUser?.role === "USER" && (
-                <>
-                  <button
-                    onClick={() => setActiveSection("paymentHistory")}
-                    className={`w-full rounded-lg border-l-4 px-4 py-3 text-left transition ${
-                      activeSection === "paymentHistory"
-                        ? "border-primary-green bg-[#c2f3db] font-semibold text-primary-green"
-                        : "border-transparent hover:bg-gray-50"
-                    }`}
-                  >
-                    Payment History
-                  </button>
-
-                  <button
-                    onClick={() => setActiveSection("paymentMethods")}
-                    className={`w-full rounded-lg border-l-4 px-4 py-3 text-left transition ${
-                      activeSection === "paymentMethods"
-                        ? "border-primary-green bg-[#c2f3db] font-semibold text-primary-green"
-                        : "border-transparent hover:bg-gray-50"
-                    }`}
-                  >
-                    Payment Methods
-                  </button>
-                </>
-              )}
-
+              <button
+                onClick={() => setActiveSection("paymentMethods")}
+                className={`w-full rounded-lg border-l-4 px-4 py-3 text-left transition ${
+                  activeSection === "paymentMethods"
+                    ? "border-primary-green bg-[#c2f3db] font-semibold text-primary-green"
+                    : "border-transparent hover:bg-gray-50"
+                }`}
+              >
+                Payment Methods
+              </button>
+                
               <button
                 onClick={() => setActiveSection("security")}
                 className={`w-full rounded-lg border-l-4 px-4 py-3 text-left transition ${
@@ -449,10 +683,11 @@ export default function ProfilePage() {
               >
                 Preferences
               </button>
+            </nav>
 
-              <div className="my-4 border-t border-border-soft" />
+            <div className="my-3 border-t border-border-soft" />
 
-              {currentUser ? (
+            {currentUser ? (
                 <button
                   onClick={handleLogout}
                   className="w-full rounded-lg px-4 py-3 font-semibold text-red-600 transition hover:bg-red-50 text-center"
@@ -467,7 +702,6 @@ export default function ProfilePage() {
                   Login
                 </Link>
               )}
-            </nav>
           </aside>
 
           {/* RIGHT CONTENT */}
@@ -595,6 +829,144 @@ export default function ProfilePage() {
                       </button>
                     </div>
                   )}
+                </div>
+              )}
+
+              {activeSection === "vehicle" && (
+                <div className="flex h-full min-h-0 flex-col">
+                  <div className="shrink-0 flex justify-between">
+                    <div>
+                      <h2 className="text-2xl font-bold text-primary-green">
+                        Vehicle Information
+                      </h2>
+
+                      <p className="mt-2 text-text-secondary">
+                        Manage the vehicles and charging presets you commonly use with VOLTRA.
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setIsAddVehicleOpen(true)}
+                      className="rounded-lg bg-primary-green px-5 py-3 font-semibold text-white transition hover:opacity-90"
+                    >
+                      + Add Vehicle
+                    </button>
+                  </div>
+
+                  <div className="hide-scrollbar mt-8 min-h-0 flex-1 overflow-y-auto">
+                    {isVehiclesLoading ? (
+                      <div className="mt-8 rounded-xl border border-border-soft p-6 text-centerrounded-xl border border-border-soft p-6 text-center">
+                        <p className="text-text-secondary">
+                          Loading vehicles...
+                        </p>
+                      </div>
+                    ) : vehicles.length === 0 ? (
+                      <div className="rounded-xl border border-border-soft p-6 text-center">
+                        <p className="font-semibold">
+                          No Vehicle Presets
+                        </p>
+
+                        <p className="mt-2 text-sm text-text-secondary">
+                          Add a vehicle to create your first charging preset.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {vehicles.map((vehicle) => (
+                          <div
+                            key={vehicle.id}
+                            className="rounded-xl border border-border-soft p-6"
+                          >
+                            {/* HEADER */}
+                            <div className="flex items-start justify-between gap-4">
+                              <div>
+                                <p className="text-sm font-semibold text-text-secondary">
+                                  Vehicle
+                                </p>
+
+                                <h3 className="mt-1 text-xl font-bold">
+                                  {vehicle.vehicleName}
+                                </h3>
+                              </div>
+
+                              <div className="flex gap-4">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setVehicleToUpdate(vehicle);
+
+                                    setUpdateVehicleForm({
+                                      vehicleName: vehicle.vehicleName,
+                                      brand: vehicle.brand,
+                                      model: vehicle.model,
+                                      preferredChargerType: vehicle.preferredChargerType,
+                                      defaultChargingDuration:
+                                        vehicle.defaultChargingDuration.toString(),
+                                    });
+
+                                    setIsUpdateVehicleOpen(true);
+                                  }}
+                                  className="rounded-lg border border-primary-green px-5 py-2.5 font-semibold text-primary-green transition hover:bg-[#c2f3db]"
+                                >
+                                  Update
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setVehicleToDelete(vehicle);
+                                    setIsDeleteVehicleOpen(true);
+                                  }}
+                                  className="rounded-lg bg-red-500 px-5 py-2.5 font-semibold text-white hover:bg-red-600"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* VEHICLE + CHARGING INFORMATION */}
+                            <div className="mt-6 grid gap-6 border-t border-border-soft pt-6 sm:grid-cols-3">
+
+                              {/* VEHICLE DETAILS */}
+                              <div>
+                                <p className="text-sm text-text-secondary">
+                                  Vehicle Model
+                                </p>
+
+                                <p className="mt-1 font-semibold">
+                                  {vehicle.brand} | {vehicle.model}
+                                </p>
+                              </div>
+
+                              {/* CHARGER TYPE */}
+                              <div>
+                                <p className="text-sm text-text-secondary">
+                                  Preferred Charger Type
+                                </p>
+
+                                <p className="mt-1 font-semibold text-primary-green">
+                                  {vehicle.preferredChargerType}
+                                </p>
+                              </div>
+
+                              {/* DURATION */}
+                              <div>
+                                <p className="text-sm text-text-secondary">
+                                  Default Charging Duration
+                                </p>
+
+                                <p className="mt-1 font-semibold">
+                                  {vehicle.defaultChargingDuration} minutes
+                                </p>
+                              </div>
+
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -969,9 +1341,11 @@ export default function ProfilePage() {
                             className="mt-2 w-full rounded-lg border border-border-soft bg-white px-4 py-3 outline-none transition focus:border-primary-green"
                           >
                             <option value="30">30 minutes</option>
-                            <option value="60">60 minutes</option>
-                            <option value="90">90 minutes</option>
-                            <option value="120">120 minutes</option>
+                            <option value="60">1 hour</option>
+                            <option value="90">1.5 hours</option>
+                            <option value="120">2 hours</option>
+                            <option value="180">3 hours</option>
+                            <option value="240">4 hours</option>
                           </select>
                         </div>
 
@@ -1097,6 +1471,400 @@ export default function ProfilePage() {
           </section>
         </div>
       </div>
+
+      {isAddVehicleOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-2xl">
+            
+            {/* HEADER */}
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-primary-green">
+                  Add Vehicle
+                </h2>
+
+                <p className="mt-2 text-sm text-text-secondary">
+                  Add a vehicle and set its default charging preferences.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsAddVehicleOpen(false)}
+                className="text-2xl text-gray-400 transition hover:text-gray-700"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* FORM */}
+            <div className="mt-7 space-y-5">
+              
+              {/* VEHICLE NAME */}
+              <div>
+                <label className="text-sm font-semibold">
+                  Vehicle Name
+                </label>
+
+                <input
+                  type="text"
+                  value={vehicleForm.vehicleName}
+                  onChange={(e) =>
+                    setVehicleForm({
+                      ...vehicleForm,
+                      vehicleName: e.target.value,
+                    })
+                  }
+                  placeholder="e.g. Jason's Tesla"
+                  className="mt-2 w-full rounded-lg border border-border-soft px-4 py-3 outline-none transition focus:border-primary-green"
+                />
+              </div>
+
+              {/* BRAND + MODEL */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="text-sm font-semibold">
+                    Brand
+                  </label>
+
+                  <input
+                    type="text"
+                    value={vehicleForm.brand}
+                    onChange={(e) =>
+                      setVehicleForm({
+                        ...vehicleForm,
+                        brand: e.target.value,
+                      })
+                    }
+                    placeholder="e.g. Tesla"
+                    className="mt-2 w-full rounded-lg border border-border-soft px-4 py-3 outline-none transition focus:border-primary-green"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold">
+                    Model
+                  </label>
+
+                  <input
+                    type="text"
+                    value={vehicleForm.model}
+                    onChange={(e) =>
+                      setVehicleForm({
+                        ...vehicleForm,
+                        model: e.target.value,
+                      })
+                    }
+                    placeholder="e.g. Model 3"
+                    className="mt-2 w-full rounded-lg border border-border-soft px-4 py-3 outline-none transition focus:border-primary-green"
+                  />
+                </div>
+              </div>
+
+              {/* CHARGER TYPE */}
+              <div>
+                <label className="text-sm font-semibold">
+                  Preferred Charger Type
+                </label>
+
+                <select
+                  value={vehicleForm.preferredChargerType}
+                  onChange={(e) =>
+                    setVehicleForm({
+                      ...vehicleForm,
+                      preferredChargerType: e.target.value as
+                        | "NORMAL"
+                        | "FAST"
+                        | "ULTRA",
+                    })
+                  }
+                  className="mt-2 w-full rounded-lg border border-border-soft bg-white px-4 py-3 outline-none transition focus:border-primary-green"
+                >
+                  <option value="NORMAL">Normal</option>
+                  <option value="FAST">Fast</option>
+                  <option value="ULTRA">Ultra</option>
+                </select>
+              </div>
+
+              {/* DURATION */}
+              <div>
+                <label className="text-sm font-semibold">
+                  Default Charging Duration
+                </label>
+
+                <select
+                  value={vehicleForm.defaultChargingDuration}
+                  onChange={(e) =>
+                    setVehicleForm({
+                      ...vehicleForm,
+                      defaultChargingDuration: e.target.value,
+                    })
+                  }
+                  className="mt-2 w-full rounded-lg border border-border-soft bg-white px-4 py-3 outline-none transition focus:border-primary-green"
+                >
+                  <option value="30">30 minutes</option>
+                  <option value="60">1 hour</option>
+                  <option value="90">1.5 hours</option>
+                  <option value="120">2 hours</option>
+                  <option value="180">3 hours</option>
+                  <option value="240">4 hours</option>
+                </select>
+              </div>
+            </div>
+
+            {/* ACTIONS */}
+            <div className="mt-8 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setIsAddVehicleOpen(false)}
+                className="rounded-lg border border-border-soft px-5 py-3 font-semibold transition hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={handleAddVehicle}
+                disabled={isAddingVehicle}
+                className="rounded-lg bg-primary-green px-5 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isAddingVehicle ? "Adding..." : "Add Vehicle"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isUpdateVehicleOpen && vehicleToUpdate && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-2xl">
+
+            {/* HEADER */}
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-primary-green">
+                  Update Vehicle
+                </h2>
+
+                <p className="mt-2 text-sm text-text-secondary">
+                  Update your vehicle and its default charging preferences.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsUpdateVehicleOpen(false);
+                  setVehicleToUpdate(null);
+                }}
+                className="text-2xl text-gray-400 transition hover:text-gray-700"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* FORM */}
+            <div className="mt-7 space-y-5">
+
+              {/* VEHICLE NAME */}
+              <div>
+                <label className="text-sm font-semibold">
+                  Vehicle Name
+                </label>
+
+                <input
+                  type="text"
+                  value={updateVehicleForm.vehicleName}
+                  onChange={(e) =>
+                    setUpdateVehicleForm({
+                      ...updateVehicleForm,
+                      vehicleName: e.target.value,
+                    })
+                  }
+                  className="mt-2 w-full rounded-lg border border-border-soft px-4 py-3 outline-none transition focus:border-primary-green"
+                />
+              </div>
+
+              {/* BRAND + MODEL */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="text-sm font-semibold">
+                    Brand
+                  </label>
+
+                  <input
+                    type="text"
+                    value={updateVehicleForm.brand}
+                    onChange={(e) =>
+                      setUpdateVehicleForm({
+                        ...updateVehicleForm,
+                        brand: e.target.value,
+                      })
+                    }
+                    className="mt-2 w-full rounded-lg border border-border-soft px-4 py-3 outline-none transition focus:border-primary-green"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold">
+                    Model
+                  </label>
+
+                  <input
+                    type="text"
+                    value={updateVehicleForm.model}
+                    onChange={(e) =>
+                      setUpdateVehicleForm({
+                        ...updateVehicleForm,
+                        model: e.target.value,
+                      })
+                    }
+                    className="mt-2 w-full rounded-lg border border-border-soft px-4 py-3 outline-none transition focus:border-primary-green"
+                  />
+                </div>
+              </div>
+
+              {/* CHARGER TYPE */}
+              <div>
+                <label className="text-sm font-semibold">
+                  Preferred Charger Type
+                </label>
+
+                <select
+                  value={updateVehicleForm.preferredChargerType}
+                  onChange={(e) =>
+                    setUpdateVehicleForm({
+                      ...updateVehicleForm,
+                      preferredChargerType: e.target.value as
+                        | "NORMAL"
+                        | "FAST"
+                        | "ULTRA",
+                    })
+                  }
+                  className="mt-2 w-full rounded-lg border border-border-soft bg-white px-4 py-3 outline-none transition focus:border-primary-green"
+                >
+                  <option value="NORMAL">Normal</option>
+                  <option value="FAST">Fast</option>
+                  <option value="ULTRA">Ultra</option>
+                </select>
+              </div>
+
+              {/* DURATION */}
+              <div>
+                <label className="text-sm font-semibold">
+                  Default Charging Duration
+                </label>
+
+                <select
+                  value={updateVehicleForm.defaultChargingDuration}
+                  onChange={(e) =>
+                    setUpdateVehicleForm({
+                      ...updateVehicleForm,
+                      defaultChargingDuration: e.target.value,
+                    })
+                  }
+                  className="mt-2 w-full rounded-lg border border-border-soft bg-white px-4 py-3 outline-none transition focus:border-primary-green"
+                >
+                  <option value="30">30 minutes</option>
+                  <option value="60">1 hour</option>
+                  <option value="90">1.5 hours</option>
+                  <option value="120">2 hours</option>
+                  <option value="180">3 hours</option>
+                  <option value="240">4 hours</option>
+                </select>
+              </div>
+            </div>
+
+            {/* ACTIONS */}
+            <div className="mt-8 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsUpdateVehicleOpen(false);
+                  setVehicleToUpdate(null);
+                }}
+                disabled={isUpdatingVehicle}
+                className="rounded-lg border border-border-soft px-5 py-3 font-semibold transition hover:bg-gray-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={handleUpdateVehicle}
+                disabled={isUpdatingVehicle}
+                className="rounded-lg bg-primary-green px-5 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isUpdatingVehicle ? "Updating..." : "Save Update"}
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {isDeleteVehicleOpen && vehicleToDelete && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+
+            {/* ICON */}
+            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600">
+              <span className="text-2xl font-bold">!</span>
+            </div>
+
+            {/* TITLE */}
+            <h2 className="text-center text-2xl font-bold text-gray-900">
+              Delete Vehicle?
+            </h2>
+
+            {/* MESSAGE */}
+            <p className="mt-3 text-center text-gray-600">
+              Are you sure you want to delete{" "}
+              <span className="font-semibold text-gray-900">
+                {vehicleToDelete.vehicleName}
+              </span>
+              ? This vehicle preset will be permanently removed.
+            </p>
+
+            {/* VEHICLE INFO */}
+            <div className="mt-6 rounded-xl bg-gray-50 p-4 text-center">
+              <p className="font-semibold">
+                {vehicleToDelete.brand} | {vehicleToDelete.model}
+              </p>
+
+              <p className="mt-1 text-sm text-text-secondary">
+                {vehicleToDelete.preferredChargerType} •{" "}
+                {vehicleToDelete.defaultChargingDuration} minutes
+              </p>
+            </div>
+
+            {/* ACTIONS */}
+            <div className="mt-7 flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsDeleteVehicleOpen(false);
+                  setVehicleToDelete(null);
+                }}
+                disabled={isDeletingVehicle}
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 font-semibold text-gray-700 transition hover:bg-gray-100 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDeleteVehicle}
+                disabled={isDeletingVehicle}
+                className="w-full rounded-xl bg-red-500 px-4 py-3 font-semibold text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isDeletingVehicle ? "Deleting..." : "Delete Vehicle"}
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
 
       {modal.open && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4">

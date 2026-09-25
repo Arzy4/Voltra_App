@@ -1,29 +1,24 @@
 "use client";
 
 import {
-    Bar,
-    BarChart,
-    CartesianGrid,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 
-const revenueData = [
-  { month: "Jan", revenue: 1800000 },
-  { month: "Feb", revenue: 2400000 },
-  { month: "Mar", revenue: 2100000 },
-  { month: "Apr", revenue: 3200000 },
-  { month: "May", revenue: 2800000 },
-  { month: "Jun", revenue: 3500000 },
-  { month: "Jul", revenue: 3100000 },
-  { month: "Aug", revenue: 4200000 },
-  { month: "Sep", revenue: 3800000 },
-  { month: "Oct", revenue: 4100000 },
-  { month: "Nov", revenue: 4600000 },
-  { month: "Dec", revenue: 5250000 },
-];
+interface RevenueOverviewData {
+  id: number;
+  month: string;
+  revenue: number;
+}
+
+interface RevenueOverviewProps {
+  data: RevenueOverviewData[];
+}
 
 function formatRevenue(value: number) {
   if (value >= 1_000_000) {
@@ -33,7 +28,9 @@ function formatRevenue(value: number) {
   return `Rp ${value.toLocaleString("id-ID")}`;
 }
 
-export default function RevenueOverview() {
+export default function RevenueOverview({
+  data,
+}: RevenueOverviewProps) {
   return (
     <div className="flex h-full min-h-0 flex-col rounded-2xl bg-white p-5 shadow-sm">
       {/* HEADER */}
@@ -56,50 +53,50 @@ export default function RevenueOverview() {
       {/* CHART */}
       <div className="mt-4 min-h-0 flex-1">
         <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-                data={revenueData}
-                margin={{
-                top: 5,
-                right: 10,
-                left: 5,
-                bottom: 0,
-                }}
-            >
-                <CartesianGrid
-                vertical={false}
-                strokeDasharray="3 3"
-                />
+          <BarChart
+            data={data}
+            margin={{
+              top: 5,
+              right: 10,
+              left: 5,
+              bottom: 0,
+            }}
+          >
+            <CartesianGrid
+              vertical={false}
+              strokeDasharray="3 3"
+            />
 
-                <XAxis
-                dataKey="month"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 11 }}
-                />
+            <XAxis
+              dataKey="month"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 11 }}
+            />
 
-                <YAxis
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 11 }}
-                tickFormatter={formatRevenue}
-                width={65}
-                />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 11 }}
+              tickFormatter={formatRevenue}
+              width={65}
+            />
 
-                <Tooltip
-                cursor={{ fill: "rgba(0, 0, 0, 0.03)" }}
-                formatter={(value) => [
-                    formatRevenue(Number(value)),
-                    "Revenue",
-                ]}
-                />
+            <Tooltip
+              cursor={{ fill: "rgba(0, 0, 0, 0.03)" }}
+              formatter={(value) => [
+                formatRevenue(Number(value)),
+                "Revenue",
+              ]}
+            />
 
-                <Bar
-                dataKey="revenue"
-                fill="#008f68"
-                radius={[4, 4, 0, 0]}
-                maxBarSize={32}
-                />
-            </BarChart>
+            <Bar
+              dataKey="revenue"
+              fill="#008f68"
+              radius={[4, 4, 0, 0]}
+              maxBarSize={32}
+            />
+          </BarChart>
         </ResponsiveContainer>
       </div>
     </div>

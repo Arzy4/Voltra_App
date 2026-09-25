@@ -9,50 +9,140 @@ import {
   Zap,
 } from "lucide-react";
 
+import { useEffect, useState } from "react";
 import ChargingTypePerformance from "./chargingTypePerformance";
 import PaymentStatus from "./paymentStatus";
 import RevenueOverview from "./revenueOverview";
 
-const dashboardStats = [
-  {
-    title: "Total Revenue",
-    value: "Rp 37.45M",
-    icon: Banknote,
-    background: "bg-[#E3FFF1]",
-  },
-  {
-    title: "Total Bookings",
-    value: "257",
-    icon: CalendarDays,
-    background: "bg-[#FFF4E5]",
-  },
-  {
-    title: "New Bookings",
-    value: "72",
-    icon: CalendarPlus,
-    background: "bg-[#EEF4FF]",
-  },
-  {
-    title: "Completed Bookings",
-    value: "185",
-    icon: CircleCheckBig,
-    background: "bg-[#F3EEFF]",
-  },
-  {
-    title: "Available Stations",
-    value: "18",
-    icon: MapPin,
-    background: "bg-[#FFF0F0]",
-  },
-  {
-    title: "Available Charging Slots",
-    value: "156",
-    icon: Zap,
-    background: "bg-[#F0F9F4]",
-  },
-];
+interface DashboardData {
+  kpi: {
+    id: number;
+    totalRevenue: number;
+    totalBookings: number;
+    newBookings: number;
+    completedBookings: number;
+    availableStations: number;
+    availableChargingSlots: number;
+  };
+
+  chargingTypePerformance: {
+    id: number;
+    type: "NORMAL" | "FAST" | "ULTRA";
+    bookings: number;
+    revenue: number;
+  }[];
+
+  paymentStatus: {
+    id: number;
+    status: "PENDING" | "PAID" | "FAILED" | "REFUNDED";
+    value: number;
+  }[];
+
+  revenueOverview: {
+    id: number;
+    month: string;
+    revenue: number;
+  }[];
+}
 
 export default function Dashboard() {
+  const [dashboardData, setDashboardData] =
+    useState<DashboardData | null>(null);
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/dashboard`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch dashboard data");
+        }
+
+        const data: DashboardData = await response.json();
+
+        setDashboardData(data);
+      } catch (error) {
+        console.error("Failed to fetch dashboard:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDashboard();
+  }, []);
+
+  const dashboardStats = dashboardData
+  ? [
+      {
+        title: "Total Revenue",
+        value: `Rp ${(dashboardData.kpi.totalRevenue / 1_000_000).toFixed(2)}M`,
+        icon: Banknote,
+        background: "bg-[#E3FFF1]",
+      },
+      {
+        title: "Total Bookings",
+        value: dashboardData.kpi.totalBookings.toString(),
+        icon: CalendarDays,
+        background: "bg-[#FFF4E5]",
+      },
+      {
+        title: "New Bookings",
+        value: dashboardData.kpi.newBookings.toString(),
+        icon: CalendarPlus,
+        background: "bg-[#EEF4FF]",
+      },
+      {
+        title: "Completed Bookings",
+        value: dashboardData.kpi.completedBookings.toString(),
+        icon: CircleCheckBig,
+        background: "bg-[#F3EEFF]",
+      },
+      {
+        title: "Available Stations",
+        value: dashboardData.kpi.availableStations.toString(),
+        icon: MapPin,
+        background: "bg-[#FFF0F0]",
+      },
+      {
+        title: "Available Charging Slots",
+        value: dashboardData.kpi.availableChargingSlots.toString(),
+        icon: Zap,
+        background: "bg-[#F0F9F4]",
+      },
+    ]
+  : [];
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <p className="text-sm text-gray-500">
+          Loading dashboard...
+        </p>
+      </div>
+    );
+  }
+
+  if (!dashboardData) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <p className="text-sm text-red-500">
+          Failed to load dashboard data.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-full min-h-0 flex-col">
 
@@ -108,18 +198,24 @@ export default function Dashboard() {
                     </div>
 
                     {/* CHARGING TYPE PERFORMANCE */}
-                    <ChargingTypePerformance />
+                    <ChargingTypePerformance
+                      data={dashboardData.chargingTypePerformance}
+                    />
 
                 </div>
 
                 {/* RIGHT SIDE */}
-                <PaymentStatus />
+                <PaymentStatus
+                  data={dashboardData.paymentStatus}
+                />
 
             </div>
             
             {/* REVENUE OVERVIEW */}
             <div className="min-h-0 flex-1">
-                <RevenueOverview />
+                <RevenueOverview 
+                  data={dashboardData.revenueOverview}
+                />
             </div>
 
         </div>
